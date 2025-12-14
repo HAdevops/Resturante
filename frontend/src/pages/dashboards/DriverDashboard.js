@@ -228,11 +228,25 @@ export default function DriverDashboard() {
                     <span className="text-gray-300">Total</span>
                     <div className="flex items-center gap-2">
                       <span className="text-2xl font-bold font-mono text-white">{delivery.total_amount.toFixed(2)} €</span>
-                      {delivery.payment_status !== 'PAID' && (
+                      {delivery.payment_status !== 'PAID' ? (
                         <Badge className="bg-red-500 animate-pulse">💵 À ENCAISSER</Badge>
+                      ) : (
+                        <Badge className="bg-green-500">✓ PAYÉ</Badge>
                       )}
                     </div>
                   </div>
+
+                  {/* Payment Button - Show if not paid */}
+                  {delivery.payment_status !== 'PAID' && (
+                    <Button 
+                      className="w-full h-14 text-lg font-bold bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 mb-3"
+                      onClick={() => markPaid(delivery.id)}
+                      data-testid={`mark-paid-${delivery.id}`}
+                    >
+                      <Banknote className="w-6 h-6 mr-2" />
+                      ENCAISSÉ - {delivery.total_amount.toFixed(2)} €
+                    </Button>
+                  )}
 
                   <div className="grid grid-cols-2 gap-3">
                     {delivery.delivery_address && (
