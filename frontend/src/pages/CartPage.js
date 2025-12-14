@@ -10,6 +10,7 @@ import { Label } from '../components/ui/label';
 import { RadioGroup, RadioGroupItem } from '../components/ui/radio-group';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import AddressForm from '../components/AddressForm';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
 
