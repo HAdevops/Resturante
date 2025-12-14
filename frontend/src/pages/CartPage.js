@@ -200,17 +200,10 @@ export default function CartPage() {
                 </div>
 
                 {fulfillmentType === 'LIVRAISON' && (
-                  <div>
-                    <Label htmlFor="address">Adresse de livraison *</Label>
-                    <Textarea
-                      id="address"
-                      value={deliveryAddress}
-                      onChange={(e) => setDeliveryAddress(e.target.value)}
-                      placeholder="Numéro, rue, code postal, ville"
-                      className="mt-1"
-                      data-testid="input-address"
-                    />
-                  </div>
+                  <AddressForm 
+                    address={{ street: '', postalCode: '', city: '' }}
+                    onChange={setDeliveryAddress}
+                  />
                 )}
 
                 <div>
