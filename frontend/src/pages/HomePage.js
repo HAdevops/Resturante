@@ -162,9 +162,13 @@ export default function HomePage() {
             <HalalBadge />
           </div>
           
-          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-serif text-white mb-4 drop-shadow-lg" data-testid="hero-title">
-            O'Delices
-          </h1>
+          {/* Logo */}
+          <img 
+            src="https://customer-assets.emergentagent.com/job_09defda6-ae44-405e-ae59-cb2fa63eebe7/artifacts/y8c8rbve_oDelices%20LOGO.png" 
+            alt="O'Delices Logo" 
+            className="h-32 sm:h-40 md:h-48 lg:h-56 w-auto mx-auto mb-4 drop-shadow-2xl"
+            data-testid="hero-logo"
+          />
           <p className="text-lg md:text-xl text-white/90 mb-2">
             Tacos • Burgers • Pizzas • Kebabs
           </p>
