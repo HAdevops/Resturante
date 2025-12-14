@@ -1,309 +1,436 @@
+#!/usr/bin/env python3
+"""
+O'Delices Backend API Test Suite
+Tests all backend endpoints for the restaurant ordering system
+"""
+
 import requests
 import sys
 import json
 from datetime import datetime
+from typing import Dict, Any, Optional
 
 class ODelicesAPITester:
-    def __init__(self, base_url="https://restaurant-hub-34.preview.emergentagent.com/api"):
+    def __init__(self, base_url: str = "https://restaurant-hub-34.preview.emergentagent.com/api"):
         self.base_url = base_url
-        self.token = None
+        self.session = requests.Session()
+        self.admin_token = None
+        self.kitchen_token = None
+        self.cashier_token = None
+        self.driver_token = None
+        self.test_order_id = None
+        self.test_category_id = None
+        self.test_product_id = None
+        
         self.tests_run = 0
         self.tests_passed = 0
-        self.admin_token = None
+        self.failed_tests = []
 
-    def run_test(self, name, method, endpoint, expected_status, data=None, headers=None):
+    def log(self, message: str, level: str = "INFO"):
+        timestamp = datetime.now().strftime("%H:%M:%S")
+        print(f"[{timestamp}] {level}: {message}")
+
+    def run_test(self, name: str, method: str, endpoint: str, expected_status: int, 
+                 data: Optional[Dict] = None, headers: Optional[Dict] = None, 
+                 token: Optional[str] = None) -> tuple[bool, Dict]:
         """Run a single API test"""
-        url = f"{self.base_url}/{endpoint}"
+        self.tests_run += 1
+        url = f"{self.base_url}/{endpoint.lstrip('/')}"
+        
         test_headers = {'Content-Type': 'application/json'}
         if headers:
             test_headers.update(headers)
-        if self.token:
-            test_headers['Authorization'] = f'Bearer {self.token}'
+        if token:
+            test_headers['Authorization'] = f'Bearer {token}'
 
-        self.tests_run += 1
-        print(f"\n🔍 Testing {name}...")
-        print(f"   URL: {url}")
+        self.log(f"🔍 Testing {name}...")
         
         try:
             if method == 'GET':
-                response = requests.get(url, headers=test_headers, timeout=10)
+                response = self.session.get(url, headers=test_headers)
             elif method == 'POST':
-                response = requests.post(url, json=data, headers=test_headers, timeout=10)
+                response = self.session.post(url, json=data, headers=test_headers)
             elif method == 'PUT':
-                response = requests.put(url, json=data, headers=test_headers, timeout=10)
+                response = self.session.put(url, json=data, headers=test_headers)
             elif method == 'DELETE':
-                response = requests.delete(url, headers=test_headers, timeout=10)
+                response = self.session.delete(url, headers=test_headers)
+            else:
+                raise ValueError(f"Unsupported method: {method}")
 
             success = response.status_code == expected_status
+            
             if success:
                 self.tests_passed += 1
-                print(f"✅ Passed - Status: {response.status_code}")
+                self.log(f"✅ PASSED - {name} (Status: {response.status_code})")
                 try:
-                    return success, response.json() if response.text else {}
+                    return True, response.json()
                 except:
-                    return success, {}
+                    return True, {}
             else:
-                print(f"❌ Failed - Expected {expected_status}, got {response.status_code}")
-                print(f"   Response: {response.text[:200]}...")
+                self.log(f"❌ FAILED - {name} (Expected {expected_status}, got {response.status_code})")
+                self.log(f"   Response: {response.text[:200]}")
+                self.failed_tests.append(f"{name}: Expected {expected_status}, got {response.status_code}")
                 return False, {}
 
         except Exception as e:
-            print(f"❌ Failed - Error: {str(e)}")
+            self.log(f"❌ FAILED - {name} (Error: {str(e)})", "ERROR")
+            self.failed_tests.append(f"{name}: {str(e)}")
             return False, {}
 
-    def test_root_endpoint(self):
-        """Test root API endpoint"""
-        success, response = self.run_test(
-            "Root API endpoint",
-            "GET",
-            "",
-            200
-        )
-        return success
-
-    def test_admin_login(self):
-        """Test admin login with provided credentials"""
+    def test_authentication(self):
+        """Test authentication endpoints"""
+        self.log("🔐 Testing Authentication System", "INFO")
+        
+        # Test admin login
         success, response = self.run_test(
             "Admin Login",
             "POST",
-            "auth/login",
+            "/auth/login",
             200,
             data={"email": "admin@odelices.fr", "password": "admin123"}
         )
         if success and 'token' in response:
             self.admin_token = response['token']
-            self.token = self.admin_token  # Set as current token
-            print(f"   Admin token obtained: {self.admin_token[:20]}...")
-            return True
-        return False
+            self.log(f"✅ Admin token obtained")
+        
+        # Test invalid login
+        self.run_test(
+            "Invalid Login",
+            "POST", 
+            "/auth/login",
+            401,
+            data={"email": "invalid@test.com", "password": "wrong"}
+        )
+        
+        # Test get current user
+        if self.admin_token:
+            self.run_test(
+                "Get Current User",
+                "GET",
+                "/auth/me",
+                200,
+                token=self.admin_token
+            )
 
-    def test_get_categories(self):
-        """Test GET /api/menu/categories"""
-        success, response = self.run_test(
-            "Get Menu Categories",
+    def test_menu_management(self):
+        """Test menu categories and products"""
+        self.log("🍽️ Testing Menu Management", "INFO")
+        
+        # Get categories
+        success, categories = self.run_test(
+            "Get Categories",
             "GET",
-            "menu/categories",
+            "/menu/categories",
             200
         )
-        if success:
-            print(f"   Found {len(response)} categories")
-            return response
-        return []
-
-    def test_get_products(self):
-        """Test GET /api/menu/products"""
-        success, response = self.run_test(
-            "Get Menu Products",
-            "GET",
-            "menu/products",
-            200
-        )
-        if success:
-            print(f"   Found {len(response)} products")
-            return response
-        return []
-
-    def test_create_category(self):
-        """Test creating a new category"""
-        success, response = self.run_test(
+        
+        # Create test category
+        success, category = self.run_test(
             "Create Category",
             "POST",
-            "menu/categories",
+            "/menu/categories",
             200,
-            data={"nom": "Test Category", "ordre": 99}
+            data={"nom": "Test Category", "ordre": 99},
+            token=self.admin_token
         )
-        if success:
-            return response.get('id')
-        return None
-
-    def test_create_product(self, category_id):
-        """Test creating a new product"""
-        if not category_id:
-            print("❌ Cannot create product without category")
-            return None
-            
-        success, response = self.run_test(
-            "Create Product",
-            "POST",
-            "menu/products",
-            200,
-            data={
-                "nom": "Test Burger",
-                "description": "Delicious test burger",
-                "prix": 12.50,
-                "category_id": category_id,
-                "image_url": "https://example.com/burger.jpg"
-            }
+        if success and 'id' in category:
+            self.test_category_id = category['id']
+        
+        # Get products
+        success, products = self.run_test(
+            "Get Products",
+            "GET",
+            "/menu/products",
+            200
         )
-        if success:
-            return response.get('id')
-        return None
+        
+        # Create test product
+        if self.test_category_id:
+            success, product = self.run_test(
+                "Create Product",
+                "POST",
+                "/menu/products",
+                200,
+                data={
+                    "category_id": self.test_category_id,
+                    "nom": "Test Product",
+                    "description": "Test description",
+                    "prix": 9.99,
+                    "image_url": "https://example.com/test.jpg"
+                },
+                token=self.admin_token
+            )
+            if success and 'id' in product:
+                self.test_product_id = product['id']
+        
+        # Get specific product
+        if self.test_product_id:
+            self.run_test(
+                "Get Specific Product",
+                "GET",
+                f"/menu/products/{self.test_product_id}",
+                200
+            )
 
-    def test_create_order(self, product_id):
-        """Test POST /api/orders"""
-        if not product_id:
-            print("❌ Cannot create order without product")
-            return None
-            
-        success, response = self.run_test(
+    def test_order_workflow(self):
+        """Test complete order workflow"""
+        self.log("📦 Testing Order Workflow", "INFO")
+        
+        if not self.test_product_id:
+            self.log("⚠️ Skipping order tests - no test product available", "WARN")
+            return
+        
+        # Create order
+        success, order = self.run_test(
             "Create Order",
             "POST",
-            "orders",
+            "/orders",
             200,
             data={
-                "items": [
-                    {
-                        "product_id": product_id,
-                        "quantite": 2
-                    }
-                ],
+                "items": [{"product_id": self.test_product_id, "quantite": 2}],
                 "customer_name": "Test Customer",
                 "customer_phone": "0123456789",
                 "customer_email": "test@example.com",
                 "type_fulfillment": "LIVRAISON",
-                "delivery_address": "123 Test Street, Test City",
-                "payment_mode": "EN_LIGNE"
+                "delivery_address": "123 Test Street",
+                "payment_mode": "A_LA_LIVRAISON"
             }
         )
-        if success:
-            return response.get('id')
-        return None
+        if success and 'id' in order:
+            self.test_order_id = order['id']
+            self.log(f"✅ Order created: {order.get('order_number')}")
+        
+        # Get orders (requires admin/staff token)
+        if self.admin_token:
+            self.run_test(
+                "Get All Orders",
+                "GET",
+                "/orders",
+                200,
+                token=self.admin_token
+            )
+        
+        # Get specific order
+        if self.test_order_id:
+            self.run_test(
+                "Get Specific Order",
+                "GET",
+                f"/orders/{self.test_order_id}",
+                200
+            )
 
-    def test_get_orders(self):
-        """Test GET /api/orders (requires authentication)"""
-        success, response = self.run_test(
-            "Get Orders",
-            "GET",
-            "orders",
-            200
-        )
-        if success:
-            print(f"   Found {len(response)} orders")
-            return response
-        return []
-
-    def test_admin_stats(self):
-        """Test admin stats endpoint"""
-        success, response = self.run_test(
-            "Admin Stats",
-            "GET",
-            "admin/stats",
-            200
-        )
-        if success:
-            print(f"   Stats: {response}")
-            return response
-        return {}
-
-    def test_admin_users(self):
-        """Test admin users endpoint"""
-        success, response = self.run_test(
-            "Admin Users",
-            "GET",
-            "admin/users",
-            200
-        )
-        if success:
-            print(f"   Found {len(response)} users")
-            return response
-        return []
-
-    def test_user_registration(self):
-        """Test user registration"""
-        timestamp = datetime.now().strftime('%H%M%S')
-        success, response = self.run_test(
-            "User Registration",
+    def test_kitchen_operations(self):
+        """Test kitchen dashboard operations"""
+        self.log("👨‍🍳 Testing Kitchen Operations", "INFO")
+        
+        if not self.test_order_id or not self.admin_token:
+            self.log("⚠️ Skipping kitchen tests - missing order or token", "WARN")
+            return
+        
+        # Kitchen acknowledge order
+        self.run_test(
+            "Kitchen Acknowledge Order",
             "POST",
-            "auth/register",
+            f"/orders/{self.test_order_id}/kitchen-ack",
+            200,
+            token=self.admin_token
+        )
+        
+        # Start preparation
+        self.run_test(
+            "Start Preparation",
+            "POST",
+            f"/orders/{self.test_order_id}/start-preparation",
+            200,
+            token=self.admin_token
+        )
+        
+        # Mark ready
+        self.run_test(
+            "Mark Order Ready",
+            "POST",
+            f"/orders/{self.test_order_id}/ready",
+            200,
+            token=self.admin_token
+        )
+
+    def test_cashier_operations(self):
+        """Test cashier dashboard operations"""
+        self.log("💰 Testing Cashier Operations", "INFO")
+        
+        if not self.admin_token:
+            self.log("⚠️ Skipping cashier tests - no admin token", "WARN")
+            return
+        
+        # Get drivers
+        self.run_test(
+            "Get Drivers",
+            "GET",
+            "/users/drivers",
+            200,
+            token=self.admin_token
+        )
+        
+        # Mark order as paid
+        if self.test_order_id:
+            self.run_test(
+                "Mark Order Paid",
+                "POST",
+                f"/orders/{self.test_order_id}/mark-paid",
+                200,
+                token=self.admin_token
+            )
+
+    def test_admin_operations(self):
+        """Test admin dashboard operations"""
+        self.log("⚙️ Testing Admin Operations", "INFO")
+        
+        if not self.admin_token:
+            self.log("⚠️ Skipping admin tests - no admin token", "WARN")
+            return
+        
+        # Get admin stats
+        self.run_test(
+            "Get Admin Stats",
+            "GET",
+            "/admin/stats",
+            200,
+            token=self.admin_token
+        )
+        
+        # Get all users
+        self.run_test(
+            "Get All Users",
+            "GET",
+            "/admin/users",
+            200,
+            token=self.admin_token
+        )
+        
+        # Get settings
+        self.run_test(
+            "Get Settings",
+            "GET",
+            "/admin/settings",
+            200,
+            token=self.admin_token
+        )
+        
+        # Create test user
+        self.run_test(
+            "Create Test User",
+            "POST",
+            "/admin/users",
             200,
             data={
-                "email": f"testuser{timestamp}@example.com",
-                "password": "TestPass123!",
+                "email": f"test-{datetime.now().strftime('%H%M%S')}@test.com",
+                "password": "testpass123",
                 "nom": "Test User",
                 "telephone": "0123456789",
-                "role": "CLIENT"
-            }
+                "role": "CUISINE"
+            },
+            token=self.admin_token
         )
-        if success and 'token' in response:
-            print(f"   User registered successfully")
-            return response['token']
-        return None
 
-    def test_auth_me(self):
-        """Test /auth/me endpoint"""
-        success, response = self.run_test(
-            "Get Current User",
-            "GET",
-            "auth/me",
-            200
+    def test_manual_order_creation(self):
+        """Test manual order creation (phone orders)"""
+        self.log("📞 Testing Manual Order Creation", "INFO")
+        
+        if not self.test_product_id or not self.admin_token:
+            self.log("⚠️ Skipping manual order tests - missing requirements", "WARN")
+            return
+        
+        self.run_test(
+            "Create Manual Order",
+            "POST",
+            "/orders/manual",
+            200,
+            data={
+                "items": [{"product_id": self.test_product_id, "quantite": 1}],
+                "customer_name": "Phone Customer",
+                "customer_phone": "0987654321",
+                "type_fulfillment": "A_EMPORTER",
+                "payment_mode": "SUR_PLACE"
+            },
+            token=self.admin_token
         )
-        if success:
-            print(f"   Current user: {response.get('nom', 'Unknown')}")
-            return response
-        return {}
+
+    def cleanup_test_data(self):
+        """Clean up test data"""
+        self.log("🧹 Cleaning up test data", "INFO")
+        
+        if self.test_product_id and self.admin_token:
+            self.run_test(
+                "Delete Test Product",
+                "DELETE",
+                f"/menu/products/{self.test_product_id}",
+                200,
+                token=self.admin_token
+            )
+        
+        if self.test_category_id and self.admin_token:
+            self.run_test(
+                "Delete Test Category",
+                "DELETE",
+                f"/menu/categories/{self.test_category_id}",
+                200,
+                token=self.admin_token
+            )
+
+    def run_all_tests(self):
+        """Run all test suites"""
+        self.log("🚀 Starting O'Delices Backend API Tests", "INFO")
+        self.log(f"🌐 Testing against: {self.base_url}", "INFO")
+        
+        try:
+            # Test basic connectivity
+            self.run_test("API Health Check", "GET", "/", 200)
+            
+            # Run test suites
+            self.test_authentication()
+            self.test_menu_management()
+            self.test_order_workflow()
+            self.test_kitchen_operations()
+            self.test_cashier_operations()
+            self.test_admin_operations()
+            self.test_manual_order_creation()
+            
+            # Cleanup
+            self.cleanup_test_data()
+            
+        except Exception as e:
+            self.log(f"💥 Test suite failed with error: {e}", "ERROR")
+        
+        # Print results
+        self.print_results()
+
+    def print_results(self):
+        """Print test results summary"""
+        self.log("=" * 60, "INFO")
+        self.log("📊 TEST RESULTS SUMMARY", "INFO")
+        self.log("=" * 60, "INFO")
+        
+        success_rate = (self.tests_passed / self.tests_run * 100) if self.tests_run > 0 else 0
+        
+        self.log(f"✅ Tests Passed: {self.tests_passed}/{self.tests_run}", "INFO")
+        self.log(f"📈 Success Rate: {success_rate:.1f}%", "INFO")
+        
+        if self.failed_tests:
+            self.log("❌ Failed Tests:", "ERROR")
+            for failure in self.failed_tests:
+                self.log(f"   - {failure}", "ERROR")
+        
+        if success_rate >= 90:
+            self.log("🎉 Backend API tests PASSED!", "INFO")
+            return 0
+        else:
+            self.log("💥 Backend API tests FAILED!", "ERROR")
+            return 1
 
 def main():
-    print("🚀 Starting O'Delices API Testing...")
-    print("=" * 50)
-    
+    """Main test runner"""
     tester = ODelicesAPITester()
-    
-    # Test basic connectivity
-    if not tester.test_root_endpoint():
-        print("❌ Root endpoint failed, stopping tests")
-        return 1
-
-    # Test admin login
-    if not tester.test_admin_login():
-        print("❌ Admin login failed, stopping tests")
-        return 1
-
-    # Test menu endpoints
-    categories = tester.test_get_categories()
-    products = tester.test_get_products()
-
-    # Test admin functionality
-    tester.test_admin_stats()
-    tester.test_admin_users()
-    
-    # Test current user info
-    tester.test_auth_me()
-
-    # Test creating new category and product
-    category_id = tester.test_create_category()
-    product_id = None
-    if category_id:
-        product_id = tester.test_create_product(category_id)
-
-    # Test order creation
-    if product_id:
-        order_id = tester.test_create_order(product_id)
-    elif products:
-        # Use existing product if available
-        order_id = tester.test_create_order(products[0]['id'])
-    else:
-        print("⚠️  No products available for order testing")
-        order_id = None
-
-    # Test getting orders
-    tester.test_get_orders()
-
-    # Test user registration
-    user_token = tester.test_user_registration()
-
-    # Print results
-    print("\n" + "=" * 50)
-    print(f"📊 Tests completed: {tester.tests_passed}/{tester.tests_run}")
-    
-    success_rate = (tester.tests_passed / tester.tests_run * 100) if tester.tests_run > 0 else 0
-    print(f"📈 Success rate: {success_rate:.1f}%")
-    
-    if success_rate >= 80:
-        print("✅ Backend API tests mostly successful!")
-        return 0
-    else:
-        print("❌ Backend API tests have significant failures")
-        return 1
+    return tester.run_all_tests()
 
 if __name__ == "__main__":
     sys.exit(main())
