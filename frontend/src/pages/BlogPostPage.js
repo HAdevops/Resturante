@@ -6,6 +6,7 @@ import { Calendar, User, ArrowLeft, ArrowRight, Share2, Facebook, Twitter } from
 import { Button } from '../components/ui/button';
 import { Card } from '../components/ui/card';
 import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 import ReactMarkdown from 'react-markdown';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
