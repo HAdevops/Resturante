@@ -31,7 +31,11 @@ export default function Navbar() {
       <nav className="hidden md:flex fixed top-0 left-0 right-0 z-50 bg-[#1a1a1a]/95 backdrop-blur-md border-b border-white/10">
         <div className="max-w-7xl mx-auto w-full px-6 py-4 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-3" data-testid="nav-logo">
-            <span className="text-2xl font-bold text-primary font-serif">O'Delices</span>
+            <img 
+              src="https://customer-assets.emergentagent.com/job_09defda6-ae44-405e-ae59-cb2fa63eebe7/artifacts/y8c8rbve_oDelices%20LOGO.png" 
+              alt="O'Delices Logo" 
+              className="h-12 w-auto"
+            />
           </Link>
           
           <div className="flex items-center gap-6">
