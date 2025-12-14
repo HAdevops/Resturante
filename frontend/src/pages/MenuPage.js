@@ -12,12 +12,12 @@ import { useCart } from '../contexts/CartContext';
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 const CATEGORY_IMAGES = {
-  'Tacos': 'https://images.unsplash.com/photo-1715601104221-bdf02645d6c2?w=400&q=80',
-  'Kebab': 'https://images.pexels.com/photos/6419686/pexels-photo-6419686.jpeg?w=400',
-  'Burgers': 'https://images.unsplash.com/photo-1634737119182-4d09e1305ba7?w=400&q=80',
-  'Sandwichs': 'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=400&q=80',
-  'Snacks': 'https://images.unsplash.com/photo-1630384060421-cb20d0e0649d?w=400&q=80',
-  'Boissons': 'https://images.unsplash.com/photo-1625772299848-391b6a87d7b3?w=400&q=80'
+  'Tacos': 'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=600&q=80',
+  'Kebab': 'https://images.unsplash.com/photo-1644364935906-792b2245a2c0?w=600&q=80',
+  'Burgers': 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600&q=80',
+  'Sandwichs': 'https://images.unsplash.com/photo-1603903631889-b5f3ba4d5b9b?w=600&q=80',
+  'Snacks': 'https://images.unsplash.com/photo-1630384060421-cb20d0e0649d?w=600&q=80',
+  'Boissons': 'https://images.unsplash.com/photo-1581006852262-e4307cf6283a?w=600&q=80'
 };
 
 export default function MenuPage() {
