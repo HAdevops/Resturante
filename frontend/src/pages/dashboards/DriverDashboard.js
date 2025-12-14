@@ -3,7 +3,7 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import { 
   Bike, MapPin, Phone, User, Navigation, CheckCircle, RefreshCw, LogOut, 
-  Package, Clock, Volume2, VolumeX, DollarSign, AlertCircle, Map
+  Package, Clock, Volume2, VolumeX, DollarSign, AlertCircle, Map, Banknote
 } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { Card } from '../../components/ui/card';
@@ -63,6 +63,17 @@ export default function DriverDashboard() {
     try {
       await axios.post(`${API}/orders/${orderId}/out-for-delivery`);
       toast.success('Livraison démarrée');
+      if (soundEnabled) playBeep('success');
+      fetchDeliveries();
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Erreur');
+    }
+  };
+
+  const markPaid = async (orderId) => {
+    try {
+      await axios.post(`${API}/orders/${orderId}/mark-paid`);
+      toast.success('💰 Paiement encaissé !');
       if (soundEnabled) playBeep('success');
       fetchDeliveries();
     } catch (err) {
