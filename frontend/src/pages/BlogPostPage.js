@@ -332,16 +332,7 @@ export default function BlogPostPage() {
         </section>
       )}
 
-      {/* Footer */}
-      <footer className="bg-[#111111] py-8 px-4">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-          <img src={ODELICES_LOGO} alt="O'Delices Logo" className="h-12 w-auto" />
-          <p className="text-white/50 text-sm text-center">
-            © {new Date().getFullYear()} O'Delices Épernon. Tous droits réservés.
-          </p>
-          <img src={HALAL_LOGO} alt="Certifié Halal" className="h-14 w-auto opacity-80" />
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }
