@@ -60,12 +60,12 @@ export default function MenuPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background noise-bg">
+    <div className="min-h-screen bg-[#1a1a1a]">
       <Navbar />
       
       <div className="pt-20 md:pt-28 pb-28 px-4 md:px-8 lg:px-16">
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-3xl md:text-4xl font-serif mb-8" data-testid="menu-title">
+          <h1 className="text-3xl md:text-4xl font-serif mb-8 text-white" data-testid="menu-title">
             Notre Menu
           </h1>
 
@@ -96,19 +96,19 @@ export default function MenuPage() {
           {loading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {[...Array(8)].map((_, i) => (
-                <Card key={i} className="overflow-hidden">
-                  <Skeleton className="h-48 w-full" />
+                <Card key={i} className="overflow-hidden bg-[#2a2a2a] border-0">
+                  <Skeleton className="h-48 w-full bg-[#333]" />
                   <div className="p-4 space-y-3">
-                    <Skeleton className="h-6 w-3/4" />
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-10 w-full" />
+                    <Skeleton className="h-6 w-3/4 bg-[#333]" />
+                    <Skeleton className="h-4 w-full bg-[#333]" />
+                    <Skeleton className="h-10 w-full bg-[#333]" />
                   </div>
                 </Card>
               ))}
             </div>
           ) : filteredProducts.length === 0 ? (
             <div className="text-center py-16">
-              <p className="text-muted-foreground text-lg">Aucun produit disponible dans cette catégorie.</p>
+              <p className="text-white/60 text-lg">Aucun produit disponible dans cette catégorie.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -119,7 +119,7 @@ export default function MenuPage() {
                 return (
                   <Card 
                     key={product.id} 
-                    className="card-product group overflow-hidden"
+                    className="group overflow-hidden bg-[#2a2a2a] border-0 rounded-2xl hover:ring-2 hover:ring-primary transition-all"
                     data-testid={`product-card-${product.id}`}
                   >
                     <div className="relative h-48 overflow-hidden">
@@ -129,14 +129,14 @@ export default function MenuPage() {
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                      <span className="absolute bottom-3 left-3 text-xs px-3 py-1 rounded-full bg-primary/90 text-primary-foreground font-medium">
+                      <span className="absolute bottom-3 left-3 text-xs px-3 py-1 rounded-full bg-primary text-black font-medium">
                         {category?.nom || 'Menu'}
                       </span>
                     </div>
                     
                     <div className="p-4">
-                      <h3 className="font-semibold text-lg mb-1 line-clamp-1">{product.nom}</h3>
-                      <p className="text-sm text-muted-foreground mb-4 line-clamp-2 min-h-[2.5rem]">
+                      <h3 className="font-semibold text-lg mb-1 line-clamp-1 text-white">{product.nom}</h3>
+                      <p className="text-sm text-white/60 mb-4 line-clamp-2 min-h-[2.5rem]">
                         {product.description || 'Préparé avec des ingrédients frais'}
                       </p>
                       
@@ -147,7 +147,7 @@ export default function MenuPage() {
                         <Button
                           size="sm"
                           onClick={() => handleAddToCart(product)}
-                          className="rounded-full"
+                          className="rounded-full bg-primary hover:bg-primary/90 text-black"
                           data-testid={`add-to-cart-${product.id}`}
                         >
                           <Plus className="w-4 h-4 mr-1" />
