@@ -1,76 +1,89 @@
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronRight, Truck, Clock, Award, Users, ShoppingBag } from 'lucide-react';
+import axios from 'axios';
+import { ChevronRight, ChevronLeft, Truck, Clock, Award, Users, ShoppingBag, Plus } from 'lucide-react';
+import { toast } from 'sonner';
 import { Button } from '../components/ui/button';
 import { Card } from '../components/ui/card';
 import Navbar from '../components/Navbar';
+import { useCart } from '../contexts/CartContext';
+
+const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 const HERO_IMAGE = "https://images.unsplash.com/photo-1561758033-d89a9ad46330?w=1920&q=85";
 
 const CATEGORIES = [
-  {
-    id: 'tacos',
-    name: 'Tacos',
-    image: 'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=600&q=80',
-    description: 'Tacos français généreux'
-  },
-  {
-    id: 'kebab',
-    name: 'Kebab',
-    image: 'https://images.unsplash.com/photo-1644364935906-792b2245a2c0?w=600&q=80',
-    description: 'Viande grillée savoureuse'
-  },
-  {
-    id: 'burgers',
-    name: 'Burgers',
-    image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600&q=80',
-    description: 'Burgers artisanaux'
-  },
-  {
-    id: 'sandwichs',
-    name: 'Sandwichs',
-    image: 'https://images.unsplash.com/photo-1603903631889-b5f3ba4d5b9b?w=600&q=80',
-    description: 'Pain frais et garnitures'
-  },
-  {
-    id: 'snacks',
-    name: 'Snacks',
-    image: 'https://images.unsplash.com/photo-1630384060421-cb20d0e0649d?w=600&q=80',
-    description: 'Frites, nuggets et plus'
-  },
-  {
-    id: 'boissons',
-    name: 'Boissons',
-    image: 'https://images.unsplash.com/photo-1581006852262-e4307cf6283a?w=600&q=80',
-    description: 'Rafraîchissements'
-  }
+  { id: 'tacos', name: 'Tacos', image: 'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=600&q=80', description: 'Tacos français généreux' },
+  { id: 'burgers', name: 'Burgers', image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600&q=80', description: 'Burgers artisanaux' },
+  { id: 'sandwichs', name: 'Sandwichs', image: 'https://images.unsplash.com/photo-1603903631889-b5f3ba4d5b9b?w=600&q=80', description: 'Pain frais et garnitures' },
+  { id: 'pizzas', name: 'Pizzas', image: 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=600&q=80', description: 'Pizzas traditionnelles' },
+  { id: 'snacks', name: 'Snacks', image: 'https://images.unsplash.com/photo-1630384060421-cb20d0e0649d?w=600&q=80', description: 'Frites, nuggets et plus' },
+  { id: 'boissons', name: 'Boissons', image: 'https://images.unsplash.com/photo-1581006852262-e4307cf6283a?w=600&q=80', description: 'Rafraîchissements' }
 ];
 
 const FEATURES = [
-  {
-    icon: Award,
-    title: 'Produits Frais',
-    description: 'Ingrédients sélectionnés avec soin'
-  },
-  {
-    icon: Truck,
-    title: 'Livraison Rapide',
-    description: 'Chez vous en 30 minutes'
-  },
-  {
-    icon: Clock,
-    title: 'Recettes Originales',
-    description: 'Préparées avec passion'
-  },
-  {
-    icon: Users,
-    title: 'Convivialité',
-    description: 'En famille ou entre amis'
-  }
+  { icon: Award, title: 'Produits Frais', description: 'Ingrédients sélectionnés' },
+  { icon: Truck, title: 'Livraison Rapide', description: 'Chez vous en 30 min' },
+  { icon: Clock, title: 'Recettes Originales', description: 'Préparées avec passion' },
+  { icon: Users, title: 'Convivialité', description: 'En famille ou entre amis' }
 ];
 
 const BANNER_IMAGE = "https://images.unsplash.com/photo-1627378378955-a3f4e406c5de?w=1920&q=80";
 
 export default function HomePage() {
+  const { addItem } = useCart();
+  const [bestSellers, setBestSellers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const carouselRef = useRef(null);
+
+  useEffect(() => {
+    fetchBestSellers();
+  }, []);
+
+  const fetchBestSellers = async () => {
+    try {
+      const res = await axios.get(`${API}/menu/products`);
+      // Pick diverse best-sellers from different categories
+      const products = res.data;
+      const selected = [];
+      const categoryNames = ['Burgers', 'Tacos', 'Pizzas', 'Sandwichs', 'Snacks'];
+      
+      // Get categories to map
+      const catRes = await axios.get(`${API}/menu/categories`);
+      const categories = catRes.data;
+      const catMap = {};
+      categories.forEach(c => { catMap[c.id] = c.nom; });
+      
+      // Select 2-3 items from each category
+      categoryNames.forEach(catName => {
+        const catProducts = products.filter(p => catMap[p.category_id] === catName);
+        const sample = catProducts.slice(0, 2);
+        selected.push(...sample);
+      });
+      
+      setBestSellers(selected.slice(0, 10));
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const scrollCarousel = (direction) => {
+    if (carouselRef.current) {
+      const scrollAmount = 320;
+      carouselRef.current.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth'
+      });
+    }
+  };
+
+  const handleAddToCart = (product) => {
+    addItem(product, 1);
+    toast.success(`${product.nom} ajouté au panier`);
+  };
+
   return (
     <div className="min-h-screen bg-[#1a1a1a]">
       <Navbar />
@@ -78,11 +91,7 @@ export default function HomePage() {
       {/* Hero Banner */}
       <section className="relative h-[70vh] md:h-[80vh] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0">
-          <img 
-            src={HERO_IMAGE} 
-            alt="O'Delices" 
-            className="w-full h-full object-cover"
-          />
+          <img src={HERO_IMAGE} alt="O'Delices" className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-black/60" />
         </div>
         
@@ -100,6 +109,88 @@ export default function HomePage() {
               <ChevronRight className="ml-2 w-5 h-5" />
             </Button>
           </Link>
+        </div>
+      </section>
+
+      {/* Best Sellers Carousel */}
+      <section className="py-12 md:py-16 px-4 md:px-8 bg-[#222222]">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-2xl md:text-3xl font-serif text-white" data-testid="bestsellers-title">
+              Nos Best-Sellers
+            </h2>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="icon"
+                className="rounded-full border-white/20 hover:bg-white/10"
+                onClick={() => scrollCarousel('left')}
+                data-testid="carousel-prev"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                className="rounded-full border-white/20 hover:bg-white/10"
+                onClick={() => scrollCarousel('right')}
+                data-testid="carousel-next"
+              >
+                <ChevronRight className="w-5 h-5" />
+              </Button>
+            </div>
+          </div>
+
+          <div
+            ref={carouselRef}
+            className="flex gap-4 overflow-x-auto scrollbar-hide pb-4 -mx-4 px-4 snap-x snap-mandatory"
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          >
+            {loading ? (
+              [...Array(5)].map((_, i) => (
+                <div key={i} className="flex-shrink-0 w-[280px] h-[360px] bg-[#2a2a2a] rounded-2xl animate-pulse" />
+              ))
+            ) : (
+              bestSellers.map(product => (
+                <Card
+                  key={product.id}
+                  className="flex-shrink-0 w-[280px] bg-[#2a2a2a] border-0 rounded-2xl overflow-hidden group snap-start hover:ring-2 hover:ring-primary transition-all"
+                  data-testid={`bestseller-${product.id}`}
+                >
+                  <div className="relative h-40 overflow-hidden">
+                    <img
+                      src={product.image_url || 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600&q=80'}
+                      alt={product.nom}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                  </div>
+                  
+                  <div className="p-4">
+                    <h3 className="font-semibold text-lg text-white mb-1 line-clamp-1">{product.nom}</h3>
+                    <p className="text-sm text-white/60 mb-3 line-clamp-2 min-h-[2.5rem]">
+                      {product.description || 'Préparé avec des ingrédients frais'}
+                    </p>
+                    
+                    <div className="flex items-center justify-between">
+                      <span className="text-xl font-bold text-primary font-mono">
+                        {product.prix.toFixed(2)} €
+                      </span>
+                      <Button
+                        size="sm"
+                        onClick={() => handleAddToCart(product)}
+                        className="rounded-full bg-primary hover:bg-primary/90 text-black"
+                        data-testid={`add-bestseller-${product.id}`}
+                      >
+                        <Plus className="w-4 h-4 mr-1" />
+                        Ajouter
+                      </Button>
+                    </div>
+                  </div>
+                </Card>
+              ))
+            )}
+          </div>
         </div>
       </section>
 
@@ -162,11 +253,7 @@ export default function HomePage() {
       {/* Banner CTA */}
       <section className="relative h-[50vh] md:h-[60vh] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0">
-          <img 
-            src={BANNER_IMAGE} 
-            alt="Burgers" 
-            className="w-full h-full object-cover"
-          />
+          <img src={BANNER_IMAGE} alt="Burgers" className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-black/50" />
         </div>
         
