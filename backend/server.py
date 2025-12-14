@@ -844,7 +844,7 @@ async def get_blog_post(slug: str):
     return post
 
 @api_router.post("/blog/posts", response_model=BlogPostResponse)
-async def create_blog_post(post: BlogPostCreate, user: dict = Depends(get_admin_user)):
+async def create_blog_post(post: BlogPostCreate, user: dict = Depends(require_roles([Role.SUPER_ADMIN]))):
     existing = await db.blog_posts.find_one({"slug": post.slug})
     if existing:
         raise HTTPException(status_code=400, detail="Un article avec ce slug existe déjà")
@@ -859,7 +859,7 @@ async def create_blog_post(post: BlogPostCreate, user: dict = Depends(get_admin_
     return {k: v for k, v in new_post.items() if k != "_id"}
 
 @api_router.put("/blog/posts/{post_id}")
-async def update_blog_post(post_id: str, post: BlogPostCreate, user: dict = Depends(get_admin_user)):
+async def update_blog_post(post_id: str, post: BlogPostCreate, user: dict = Depends(require_roles([Role.SUPER_ADMIN]))):
     existing = await db.blog_posts.find_one({"id": post_id})
     if not existing:
         raise HTTPException(status_code=404, detail="Article non trouvé")
@@ -871,7 +871,7 @@ async def update_blog_post(post_id: str, post: BlogPostCreate, user: dict = Depe
     return updated
 
 @api_router.delete("/blog/posts/{post_id}")
-async def delete_blog_post(post_id: str, user: dict = Depends(get_admin_user)):
+async def delete_blog_post(post_id: str, user: dict = Depends(require_roles([Role.SUPER_ADMIN]))):
     result = await db.blog_posts.delete_one({"id": post_id})
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Article non trouvé")
