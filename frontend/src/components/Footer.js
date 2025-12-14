@@ -1,12 +1,17 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronRight, X, Shield } from 'lucide-react';
+import { ChevronRight, Shield, Lock, CreditCard, ShieldCheck } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { Button } from './ui/button';
 import { ScrollArea } from './ui/scroll-area';
 
 const ODELICES_LOGO = "https://customer-assets.emergentagent.com/job_09defda6-ae44-405e-ae59-cb2fa63eebe7/artifacts/y8c8rbve_oDelices%20LOGO.png";
 const HALAL_LOGO = "https://customer-assets.emergentagent.com/job_09defda6-ae44-405e-ae59-cb2fa63eebe7/artifacts/uegijlrg_halal%20white.png";
+
+// Payment card logos (using SVG data URIs for reliability)
+const VISA_LOGO = "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Visa_Inc._logo.svg/200px-Visa_Inc._logo.svg.png";
+const MASTERCARD_LOGO = "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Mastercard-logo.svg/200px-Mastercard-logo.svg.png";
+const CB_LOGO = "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Carte_Bancaire.svg/100px-Carte_Bancaire.svg.png";
 
 export default function Footer({ showPrivacyPolicy = true }) {
   const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
@@ -15,6 +20,7 @@ export default function Footer({ showPrivacyPolicy = true }) {
     <>
       <footer className="bg-[#111111] py-8 px-4 md:px-8">
         <div className="max-w-7xl mx-auto">
+          {/* Main Footer Content */}
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             {/* Logo */}
             <div className="flex items-center gap-4">
@@ -45,9 +51,58 @@ export default function Footer({ showPrivacyPolicy = true }) {
             </div>
           </div>
 
+          {/* Secure Payment Section */}
+          <div className="mt-8 pt-8 border-t border-white/10">
+            <div className="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-12">
+              {/* SSL Secure Badge */}
+              <div className="flex items-center gap-3 px-4 py-2 bg-green-500/10 border border-green-500/30 rounded-full">
+                <div className="relative">
+                  <Lock className="w-5 h-5 text-green-500" />
+                  <ShieldCheck className="w-3 h-3 text-green-400 absolute -bottom-1 -right-1" />
+                </div>
+                <div className="text-left">
+                  <p className="text-green-400 font-semibold text-sm">SSL Sécurisé</p>
+                  <p className="text-green-500/70 text-xs">Connexion cryptée</p>
+                </div>
+              </div>
+
+              {/* Payment Cards */}
+              <div className="flex flex-col items-center gap-2">
+                <p className="text-white/50 text-xs uppercase tracking-wider">Paiement 100% sécurisé</p>
+                <div className="flex items-center gap-3 px-4 py-2 bg-white/5 rounded-xl border border-white/10">
+                  {/* Visa */}
+                  <div className="bg-white rounded px-2 py-1">
+                    <img src={VISA_LOGO} alt="Visa" className="h-6 w-auto" />
+                  </div>
+                  {/* Mastercard */}
+                  <div className="bg-white rounded px-2 py-1">
+                    <img src={MASTERCARD_LOGO} alt="Mastercard" className="h-6 w-auto" />
+                  </div>
+                  {/* CB */}
+                  <div className="bg-white rounded px-2 py-1">
+                    <img src={CB_LOGO} alt="Carte Bancaire" className="h-6 w-auto" />
+                  </div>
+                  {/* Generic Card Icon */}
+                  <div className="flex items-center gap-1 text-white/60">
+                    <CreditCard className="w-6 h-6" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Secure Transaction Badge */}
+              <div className="flex items-center gap-3 px-4 py-2 bg-blue-500/10 border border-blue-500/30 rounded-full">
+                <Shield className="w-5 h-5 text-blue-400" />
+                <div className="text-left">
+                  <p className="text-blue-400 font-semibold text-sm">Transaction sécurisée</p>
+                  <p className="text-blue-500/70 text-xs">Données protégées</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Privacy Policy Link */}
           {showPrivacyPolicy && (
-            <div className="mt-8 pt-8 border-t border-white/10 text-center">
+            <div className="mt-6 pt-6 border-t border-white/10 text-center">
               <button
                 onClick={() => setIsPrivacyOpen(true)}
                 className="inline-flex items-center gap-2 text-primary font-semibold hover:text-primary/80 transition-colors group"
