@@ -6,6 +6,7 @@ import { Calendar, User, ArrowRight, Search } from 'lucide-react';
 import { Card } from '../components/ui/card';
 import { Input } from '../components/ui/input';
 import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
