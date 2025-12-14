@@ -182,6 +182,13 @@ export default function HomePage() {
             </Button>
           </Link>
         </div>
+
+        {/* Halal Logo - Bottom Right Corner */}
+        <img 
+          src="https://customer-assets.emergentagent.com/job_09defda6-ae44-405e-ae59-cb2fa63eebe7/artifacts/uegijlrg_halal%20white.png"
+          alt="Certifié Halal"
+          className="absolute bottom-6 right-6 md:bottom-10 md:right-10 h-16 md:h-24 w-auto z-10 opacity-90"
+        />
       </section>
 
       {/* Promotions Section */}
