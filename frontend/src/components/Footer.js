@@ -98,23 +98,11 @@ export default function Footer({ showPrivacyPolicy = true }) {
               {/* Payment Cards */}
               <div className="flex flex-col items-center gap-2">
                 <p className="text-white/50 text-xs uppercase tracking-wider">Paiement 100% sécurisé</p>
-                <div className="flex items-center gap-3 px-4 py-2 bg-white/5 rounded-xl border border-white/10">
-                  {/* Visa */}
-                  <div className="bg-white rounded px-2 py-1">
-                    <img src={VISA_LOGO} alt="Visa" className="h-6 w-auto" />
-                  </div>
-                  {/* Mastercard */}
-                  <div className="bg-white rounded px-2 py-1">
-                    <img src={MASTERCARD_LOGO} alt="Mastercard" className="h-6 w-auto" />
-                  </div>
-                  {/* CB */}
-                  <div className="bg-white rounded px-2 py-1">
-                    <img src={CB_LOGO} alt="Carte Bancaire" className="h-6 w-auto" />
-                  </div>
-                  {/* Generic Card Icon */}
-                  <div className="flex items-center gap-1 text-white/60">
-                    <CreditCard className="w-6 h-6" />
-                  </div>
+                <div className="flex items-center gap-2 px-4 py-3 bg-white/5 rounded-xl border border-white/10">
+                  <VisaIcon />
+                  <MastercardIcon />
+                  <CBIcon />
+                  <AmexIcon />
                 </div>
               </div>
 
