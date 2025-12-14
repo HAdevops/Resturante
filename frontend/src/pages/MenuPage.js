@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import axios from 'axios';
-import { Plus, Minus, ShoppingBag } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { toast } from 'sonner';
+import { Helmet } from 'react-helmet';
 import { Button } from '../components/ui/button';
 import { Card } from '../components/ui/card';
 import { Skeleton } from '../components/ui/skeleton';
@@ -16,7 +17,12 @@ const CATEGORY_IMAGES = {
   'Kebab': 'https://images.unsplash.com/photo-1644364935906-792b2245a2c0?w=600&q=80',
   'Burgers': 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600&q=80',
   'Sandwichs': 'https://images.unsplash.com/photo-1603903631889-b5f3ba4d5b9b?w=600&q=80',
+  'Pizzas': 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=600&q=80',
+  'Assiettes': 'https://images.unsplash.com/photo-1544025162-d76694265947?w=600&q=80',
+  'Salades': 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=600&q=80',
+  'Paninis': 'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=600&q=80',
   'Snacks': 'https://images.unsplash.com/photo-1630384060421-cb20d0e0649d?w=600&q=80',
+  'Desserts': 'https://images.unsplash.com/photo-1551024601-bec78aea704b?w=600&q=80',
   'Boissons': 'https://images.unsplash.com/photo-1581006852262-e4307cf6283a?w=600&q=80'
 };
 
@@ -31,6 +37,13 @@ export default function MenuPage() {
   useEffect(() => {
     fetchMenu();
   }, []);
+
+  useEffect(() => {
+    const category = searchParams.get('category');
+    if (category) {
+      setSelectedCategory(category);
+    }
+  }, [searchParams]);
 
   const fetchMenu = async () => {
     try {
@@ -61,6 +74,11 @@ export default function MenuPage() {
 
   return (
     <div className="min-h-screen bg-[#1a1a1a]">
+      <Helmet>
+        <title>Menu - O'Delices Épernon | Tacos, Burgers, Pizzas Halal</title>
+        <meta name="description" content="Découvrez notre menu complet: Tacos, Burgers, Pizzas, Kebabs, Sandwichs et plus. Tous nos produits sont 100% Halal. Commande en ligne à Épernon." />
+      </Helmet>
+
       <Navbar />
       
       <div className="pt-20 md:pt-28 pb-28 px-4 md:px-8 lg:px-16">
@@ -69,28 +87,43 @@ export default function MenuPage() {
             Notre Menu
           </h1>
 
-          <div className="mb-8 overflow-x-auto scrollbar-hide -mx-4 px-4">
-            <div className="flex gap-3 pb-2">
-              <Button
-                variant={selectedCategory === null ? 'default' : 'outline'}
+          {/* Category Tabs - Styled like homepage */}
+          <div className="mb-8">
+            <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-4 -mx-4 px-4" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+              <button
                 onClick={() => setSelectedCategory(null)}
-                className="rounded-full whitespace-nowrap"
+                className={`flex-shrink-0 px-6 py-3 rounded-full font-semibold transition-all ${
+                  selectedCategory === null
+                    ? 'bg-primary text-black shadow-lg shadow-primary/30'
+                    : 'bg-[#2a2a2a] text-white hover:bg-[#3a3a3a] border border-white/10'
+                }`}
                 data-testid="category-all"
               >
                 Tous
-              </Button>
+              </button>
               {categories.map(cat => (
-                <Button
+                <button
                   key={cat.id}
-                  variant={selectedCategory === cat.nom ? 'default' : 'outline'}
                   onClick={() => setSelectedCategory(cat.nom)}
-                  className="rounded-full whitespace-nowrap"
+                  className={`flex-shrink-0 px-6 py-3 rounded-full font-semibold transition-all ${
+                    selectedCategory === cat.nom
+                      ? 'bg-primary text-black shadow-lg shadow-primary/30'
+                      : 'bg-[#2a2a2a] text-white hover:bg-[#3a3a3a] border border-white/10'
+                  }`}
                   data-testid={`category-btn-${cat.nom.toLowerCase()}`}
                 >
                   {cat.nom}
-                </Button>
+                </button>
               ))}
             </div>
+          </div>
+
+          {/* Products count */}
+          <div className="mb-6">
+            <p className="text-white/60">
+              {filteredProducts.length} produit{filteredProducts.length > 1 ? 's' : ''} 
+              {selectedCategory && ` dans ${selectedCategory}`}
+            </p>
           </div>
 
           {loading ? (
