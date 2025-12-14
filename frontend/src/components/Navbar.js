@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Home, UtensilsCrossed, ShoppingBag, User, LogOut, LayoutDashboard } from 'lucide-react';
+import { Home, UtensilsCrossed, ShoppingBag, User, LogOut, LayoutDashboard, BookOpen } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
 import { Button } from './ui/button';
@@ -12,6 +12,7 @@ export default function Navbar() {
   const navItems = [
     { path: '/', icon: Home, label: 'Accueil' },
     { path: '/menu', icon: UtensilsCrossed, label: 'Menu' },
+    { path: '/blog', icon: BookOpen, label: 'Blog' },
     { path: '/panier', icon: ShoppingBag, label: 'Panier', badge: itemCount },
   ];
 
