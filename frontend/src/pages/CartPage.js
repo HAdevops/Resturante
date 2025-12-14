@@ -269,6 +269,8 @@ export default function CartPage() {
           </div>
         </div>
       </div>
+
+      <Footer showPrivacyPolicy={false} />
     </div>
   );
 }
