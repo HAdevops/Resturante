@@ -1,6 +1,7 @@
 import { MapPin, Phone, Clock, Mail } from 'lucide-react';
 import { Card } from '../components/ui/card';
 import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 
 export default function ContactPage() {
   return (
