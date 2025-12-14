@@ -496,8 +496,43 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Footer */}
+      <footer className="bg-[#111111] py-8 px-4 md:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+            {/* Logo */}
+            <div className="flex items-center gap-4">
+              <img 
+                src="https://customer-assets.emergentagent.com/job_09defda6-ae44-405e-ae59-cb2fa63eebe7/artifacts/y8c8rbve_oDelices%20LOGO.png" 
+                alt="O'Delices Logo" 
+                className="h-16 w-auto"
+              />
+            </div>
+
+            {/* Copyright */}
+            <div className="text-center">
+              <p className="text-white/50 text-sm">
+                © {new Date().getFullYear()} O'Delices Épernon. Tous droits réservés.
+              </p>
+              <p className="text-white/40 text-xs mt-1">
+                Tacos • Burgers • Pizzas • Kebabs - Livraison à Épernon et environs
+              </p>
+            </div>
+
+            {/* Halal Logo */}
+            <div className="flex items-center gap-3">
+              <img 
+                src="https://customer-assets.emergentagent.com/job_09defda6-ae44-405e-ae59-cb2fa63eebe7/artifacts/uegijlrg_halal%20white.png"
+                alt="Certifié Halal"
+                className="h-16 md:h-20 w-auto opacity-80"
+              />
+            </div>
+          </div>
+        </div>
+      </footer>
+
       {/* Footer spacing for mobile nav */}
-      <div className="h-20 md:h-0 bg-[#1a1a1a]" />
+      <div className="h-20 md:h-0 bg-[#111111]" />
     </div>
   );
 }
