@@ -224,6 +224,8 @@ export default function CheckoutPage() {
           </Button>
         </div>
       </div>
+
+      <Footer showPrivacyPolicy={false} />
     </div>
   );
 }
