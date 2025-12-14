@@ -36,7 +36,8 @@ export default function ContactPage() {
                 <div>
                   <h3 className="font-semibold mb-1">Téléphone</h3>
                   <p className="text-muted-foreground">
-                    02 37 83 XX XX
+                    02 19 02 30 94<br />
+                    06 26 79 16 29
                   </p>
                 </div>
               </div>
@@ -62,7 +63,10 @@ export default function ContactPage() {
                   <p className="text-muted-foreground">
                     Ouvert 6 jours sur 7<br />
                     11h30 - 14h30<br />
-                    18h00 - 22h30
+                    18h00 - 22h00
+                  </p>
+                  <p className="text-red-400 font-semibold mt-1">
+                    Fermé tous les lundis
                   </p>
                 </div>
               </div>
