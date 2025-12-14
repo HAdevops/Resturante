@@ -196,6 +196,8 @@ export default function MenuPage() {
           )}
         </div>
       </div>
+
+      <Footer />
     </div>
   );
 }
