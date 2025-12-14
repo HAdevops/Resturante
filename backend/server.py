@@ -803,6 +803,80 @@ async def stripe_webhook(request: Request):
         logger.error(f"Webhook error: {e}")
         return {"received": True}
 
+# ========== BLOG MODELS ==========
+class BlogPostCreate(BaseModel):
+    title: str
+    slug: str
+    excerpt: str
+    content: str
+    image_url: Optional[str] = None
+    meta_description: str
+    meta_keywords: List[str] = []
+    author: str = "O'Delices"
+    is_published: bool = True
+
+class BlogPostResponse(BaseModel):
+    id: str
+    title: str
+    slug: str
+    excerpt: str
+    content: str
+    image_url: Optional[str]
+    meta_description: str
+    meta_keywords: List[str]
+    author: str
+    is_published: bool
+    created_at: str
+    updated_at: str
+
+# ========== BLOG ENDPOINTS ==========
+@api_router.get("/blog/posts", response_model=List[BlogPostResponse])
+async def get_blog_posts(published_only: bool = True):
+    query = {"is_published": True} if published_only else {}
+    posts = await db.blog_posts.find(query, {"_id": 0}).sort("created_at", -1).to_list(100)
+    return posts
+
+@api_router.get("/blog/posts/{slug}")
+async def get_blog_post(slug: str):
+    post = await db.blog_posts.find_one({"slug": slug}, {"_id": 0})
+    if not post:
+        raise HTTPException(status_code=404, detail="Article non trouvé")
+    return post
+
+@api_router.post("/blog/posts", response_model=BlogPostResponse)
+async def create_blog_post(post: BlogPostCreate, user: dict = Depends(get_admin_user)):
+    existing = await db.blog_posts.find_one({"slug": post.slug})
+    if existing:
+        raise HTTPException(status_code=400, detail="Un article avec ce slug existe déjà")
+    now = datetime.now(timezone.utc).isoformat()
+    new_post = {
+        "id": str(uuid.uuid4()),
+        **post.dict(),
+        "created_at": now,
+        "updated_at": now
+    }
+    await db.blog_posts.insert_one(new_post)
+    return {k: v for k, v in new_post.items() if k != "_id"}
+
+@api_router.put("/blog/posts/{post_id}")
+async def update_blog_post(post_id: str, post: BlogPostCreate, user: dict = Depends(get_admin_user)):
+    existing = await db.blog_posts.find_one({"id": post_id})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Article non trouvé")
+    await db.blog_posts.update_one(
+        {"id": post_id},
+        {"$set": {**post.dict(), "updated_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    updated = await db.blog_posts.find_one({"id": post_id}, {"_id": 0})
+    return updated
+
+@api_router.delete("/blog/posts/{post_id}")
+async def delete_blog_post(post_id: str, user: dict = Depends(get_admin_user)):
+    result = await db.blog_posts.delete_one({"id": post_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Article non trouvé")
+    return {"message": "Article supprimé"}
+
 @app.websocket("/ws/{room}")
 async def websocket_endpoint(websocket: WebSocket, room: str):
     await manager.connect(websocket, room)
