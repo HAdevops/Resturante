@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { Button } from '../components/ui/button';
 import { Card } from '../components/ui/card';
 import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 import { useCart } from '../contexts/CartContext';
 import { Helmet } from 'react-helmet';
 
