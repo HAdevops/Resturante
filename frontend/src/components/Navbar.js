@@ -28,7 +28,7 @@ export default function Navbar() {
 
   return (
     <>
-      <nav className="hidden md:flex fixed top-0 left-0 right-0 z-50 glass border-b border-white/10">
+      <nav className="hidden md:flex fixed top-0 left-0 right-0 z-50 bg-[#1a1a1a]/95 backdrop-blur-md border-b border-white/10">
         <div className="max-w-7xl mx-auto w-full px-6 py-4 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-3" data-testid="nav-logo">
             <span className="text-2xl font-bold text-primary font-serif">O'Delices</span>
@@ -92,7 +92,7 @@ export default function Navbar() {
         </div>
       </nav>
 
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 glass border-t border-white/10 px-4 py-2 safe-area-bottom">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#1a1a1a]/95 backdrop-blur-md border-t border-white/10 px-4 py-2 safe-area-bottom">
         <div className="flex items-center justify-around">
           {navItems.map(item => (
             <Link
