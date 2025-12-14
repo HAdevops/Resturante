@@ -1,12 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import { ChevronRight, ChevronLeft, Truck, Clock, Award, Users, ShoppingBag, Plus } from 'lucide-react';
+import { ChevronRight, ChevronLeft, Truck, Clock, Award, Users, ShoppingBag, Plus, Percent, Star, BadgeCheck } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '../components/ui/button';
 import { Card } from '../components/ui/card';
 import Navbar from '../components/Navbar';
 import { useCart } from '../contexts/CartContext';
+import { Helmet } from 'react-helmet';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
@@ -28,13 +29,63 @@ const FEATURES = [
   { icon: Users, title: 'Convivialité', description: 'En famille ou entre amis' }
 ];
 
+const PROMOTIONS = [
+  {
+    id: 'promo1',
+    title: 'Menu Tacos Complet',
+    description: 'Tacos 2 viandes + Frites + Boisson',
+    originalPrice: 14.90,
+    promoPrice: 10.90,
+    image: 'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=600&q=80',
+    badge: '-27%'
+  },
+  {
+    id: 'promo2',
+    title: 'Burger du Chef',
+    description: 'Notre burger signature avec frites maison',
+    originalPrice: 16.50,
+    promoPrice: 13.50,
+    image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600&q=80',
+    badge: 'BEST'
+  },
+  {
+    id: 'promo3',
+    title: 'Pizza + Boisson',
+    description: 'Pizza au choix + Boisson 50cl',
+    originalPrice: 12.50,
+    promoPrice: 9.90,
+    image: 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=600&q=80',
+    badge: '-21%'
+  },
+  {
+    id: 'promo4',
+    title: 'Menu Famille',
+    description: '2 Burgers + 2 Tacos + Grande Frites + 4 Boissons',
+    originalPrice: 45.00,
+    promoPrice: 35.90,
+    image: 'https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?w=600&q=80',
+    badge: '-20%'
+  }
+];
+
 const BANNER_IMAGE = "https://images.unsplash.com/photo-1627378378955-a3f4e406c5de?w=1920&q=80";
+
+// Halal Badge Component
+const HalalBadge = () => (
+  <div className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-full">
+    <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15l-4-4 1.41-1.41L11 14.17l6.59-6.59L19 9l-8 8z"/>
+    </svg>
+    <span className="font-bold text-sm">100% HALAL</span>
+  </div>
+);
 
 export default function HomePage() {
   const { addItem } = useCart();
   const [bestSellers, setBestSellers] = useState([]);
   const [loading, setLoading] = useState(true);
   const carouselRef = useRef(null);
+  const promoRef = useRef(null);
 
   useEffect(() => {
     fetchBestSellers();
@@ -43,18 +94,14 @@ export default function HomePage() {
   const fetchBestSellers = async () => {
     try {
       const res = await axios.get(`${API}/menu/products`);
-      // Pick diverse best-sellers from different categories
       const products = res.data;
       const selected = [];
-      const categoryNames = ['Burgers', 'Tacos', 'Pizzas', 'Sandwichs', 'Snacks'];
-      
-      // Get categories to map
       const catRes = await axios.get(`${API}/menu/categories`);
       const categories = catRes.data;
       const catMap = {};
       categories.forEach(c => { catMap[c.id] = c.nom; });
       
-      // Select 2-3 items from each category
+      const categoryNames = ['Burgers', 'Tacos', 'Pizzas', 'Sandwichs', 'Snacks'];
       categoryNames.forEach(catName => {
         const catProducts = products.filter(p => catMap[p.category_id] === catName);
         const sample = catProducts.slice(0, 2);
@@ -69,10 +116,10 @@ export default function HomePage() {
     }
   };
 
-  const scrollCarousel = (direction) => {
-    if (carouselRef.current) {
+  const scrollCarousel = (ref, direction) => {
+    if (ref.current) {
       const scrollAmount = 320;
-      carouselRef.current.scrollBy({
+      ref.current.scrollBy({
         left: direction === 'left' ? -scrollAmount : scrollAmount,
         behavior: 'smooth'
       });
@@ -86,22 +133,43 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-[#1a1a1a]">
+      <Helmet>
+        <title>O'Delices Épernon - Tacos, Burgers, Pizzas | Livraison & À Emporter</title>
+        <meta name="description" content="O'Delices à Épernon (28230) - Restaurant Halal. Commandez en ligne vos Tacos, Burgers, Pizzas, Kebabs. Livraison rapide à Épernon, Maintenon, Hanches, Droue-sur-Drouette, Gas et environs." />
+        <meta name="keywords" content="restaurant épernon, tacos épernon, burger épernon, pizza épernon, livraison épernon 28230, halal épernon, fast food maintenon, restaurant hanches, kebab épernon" />
+        <meta name="geo.region" content="FR-28" />
+        <meta name="geo.placename" content="Épernon" />
+        <meta name="geo.position" content="48.6081;1.6621" />
+        <meta property="og:title" content="O'Delices Épernon - Tacos, Burgers, Pizzas Halal" />
+        <meta property="og:description" content="Commandez en ligne vos plats préférés. Livraison rapide à Épernon et environs. 100% Halal." />
+        <meta property="og:type" content="restaurant" />
+        <meta property="og:locale" content="fr_FR" />
+        <link rel="canonical" href="https://odelices-epernon.fr" />
+      </Helmet>
+
       <Navbar />
       
       {/* Hero Banner */}
       <section className="relative h-[70vh] md:h-[80vh] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0">
-          <img src={HERO_IMAGE} alt="O'Delices" className="w-full h-full object-cover" />
+          <img src={HERO_IMAGE} alt="O'Delices Restaurant Halal Épernon" className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-black/60" />
         </div>
         
         <div className="relative z-10 text-center px-4">
-          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-serif text-white mb-6 drop-shadow-lg" data-testid="hero-title">
+          {/* Halal Badge */}
+          <div className="flex justify-center mb-6">
+            <HalalBadge />
+          </div>
+          
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-serif text-white mb-4 drop-shadow-lg" data-testid="hero-title">
             O'Delices
           </h1>
-          <p className="text-lg md:text-xl text-white/90 mb-8 max-w-2xl mx-auto">
-            Tacos, Kebabs, Burgers artisanaux<br />
-            Livraison et à emporter à Épernon
+          <p className="text-lg md:text-xl text-white/90 mb-2">
+            Tacos • Burgers • Pizzas • Kebabs
+          </p>
+          <p className="text-base text-primary mb-8">
+            Livraison à Épernon et environs
           </p>
           <Link to="/menu" data-testid="cta-commander">
             <Button size="lg" className="bg-primary hover:bg-primary/90 text-black font-bold rounded-full text-lg px-10 py-6 shadow-lg hover:shadow-xl transition-all">
@@ -112,19 +180,110 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Best Sellers Carousel */}
-      <section className="py-12 md:py-16 px-4 md:px-8 bg-[#222222]">
+      {/* Promotions Section */}
+      <section className="py-12 md:py-16 px-4 md:px-8 bg-gradient-to-b from-[#1a1a1a] to-[#222222]">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between mb-8">
-            <h2 className="text-2xl md:text-3xl font-serif text-white" data-testid="bestsellers-title">
-              Nos Best-Sellers
-            </h2>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center">
+                <Percent className="w-5 h-5 text-red-500" />
+              </div>
+              <h2 className="text-2xl md:text-3xl font-serif text-white" data-testid="promotions-title">
+                Nos Promotions
+              </h2>
+            </div>
             <div className="flex gap-2">
               <Button
                 variant="outline"
                 size="icon"
                 className="rounded-full border-white/20 hover:bg-white/10"
-                onClick={() => scrollCarousel('left')}
+                onClick={() => scrollCarousel(promoRef, 'left')}
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                className="rounded-full border-white/20 hover:bg-white/10"
+                onClick={() => scrollCarousel(promoRef, 'right')}
+              >
+                <ChevronRight className="w-5 h-5" />
+              </Button>
+            </div>
+          </div>
+
+          <div
+            ref={promoRef}
+            className="flex gap-4 overflow-x-auto scrollbar-hide pb-4 -mx-4 px-4 snap-x snap-mandatory"
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          >
+            {PROMOTIONS.map(promo => (
+              <Card
+                key={promo.id}
+                className="flex-shrink-0 w-[300px] bg-gradient-to-br from-[#2a2a2a] to-[#1f1f1f] border-0 rounded-2xl overflow-hidden group snap-start hover:ring-2 hover:ring-red-500 transition-all relative"
+                data-testid={`promo-${promo.id}`}
+              >
+                {/* Promo Badge */}
+                <div className="absolute top-3 right-3 z-10">
+                  <span className="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full">
+                    {promo.badge}
+                  </span>
+                </div>
+                
+                <div className="relative h-36 overflow-hidden">
+                  <img
+                    src={promo.image}
+                    alt={promo.title}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+                </div>
+                
+                <div className="p-4">
+                  <h3 className="font-bold text-lg text-white mb-1">{promo.title}</h3>
+                  <p className="text-sm text-white/60 mb-3">{promo.description}</p>
+                  
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-white/40 line-through">
+                        {promo.originalPrice.toFixed(2)} €
+                      </span>
+                      <span className="text-xl font-bold text-red-500 font-mono">
+                        {promo.promoPrice.toFixed(2)} €
+                      </span>
+                    </div>
+                    <Link to="/menu">
+                      <Button size="sm" className="rounded-full bg-red-500 hover:bg-red-600 text-white">
+                        <Plus className="w-4 h-4 mr-1" />
+                        Voir
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Best Sellers Carousel */}
+      <section className="py-12 md:py-16 px-4 md:px-8 bg-[#222222]">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+                <Star className="w-5 h-5 text-primary" />
+              </div>
+              <h2 className="text-2xl md:text-3xl font-serif text-white" data-testid="bestsellers-title">
+                Nos Best-Sellers
+              </h2>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="icon"
+                className="rounded-full border-white/20 hover:bg-white/10"
+                onClick={() => scrollCarousel(carouselRef, 'left')}
                 data-testid="carousel-prev"
               >
                 <ChevronLeft className="w-5 h-5" />
@@ -133,7 +292,7 @@ export default function HomePage() {
                 variant="outline"
                 size="icon"
                 className="rounded-full border-white/20 hover:bg-white/10"
-                onClick={() => scrollCarousel('right')}
+                onClick={() => scrollCarousel(carouselRef, 'right')}
                 data-testid="carousel-next"
               >
                 <ChevronRight className="w-5 h-5" />
@@ -250,31 +409,53 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Banner CTA */}
+      {/* Banner CTA with Halal */}
       <section className="relative h-[50vh] md:h-[60vh] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0">
-          <img src={BANNER_IMAGE} alt="Burgers" className="w-full h-full object-cover" />
+          <img src={BANNER_IMAGE} alt="Burgers Halal O'Delices" className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-black/50" />
         </div>
         
         <div className="relative z-10 text-center px-4">
+          <div className="flex justify-center mb-4">
+            <HalalBadge />
+          </div>
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif text-white mb-6">
-            Nos Burgers Artisanaux
+            Viandes 100% Halal
           </h2>
           <p className="text-lg text-white/80 mb-8 max-w-xl mx-auto">
-            Préparés avec des ingrédients frais et de qualité
+            Toutes nos viandes sont certifiées Halal et préparées avec soin
           </p>
           <Link to="/menu?category=Burgers">
             <Button size="lg" className="bg-primary hover:bg-primary/90 text-black font-bold rounded-full text-lg px-8 py-6">
-              DÉCOUVRIR
+              DÉCOUVRIR NOS BURGERS
               <ChevronRight className="ml-2 w-5 h-5" />
             </Button>
           </Link>
         </div>
       </section>
 
-      {/* Info Section */}
+      {/* Delivery Zones */}
       <section className="py-12 md:py-16 px-4 md:px-8 bg-[#1a1a1a]">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-2xl md:text-3xl font-serif text-white mb-6">
+            Zones de Livraison
+          </h2>
+          <p className="text-white/70 mb-8">
+            Nous livrons dans un rayon de 5km autour d'Épernon
+          </p>
+          <div className="flex flex-wrap justify-center gap-3">
+            {['Épernon', 'Maintenon', 'Hanches', 'Droue-sur-Drouette', 'Gas', 'Saint-Martin-de-Nigelles', 'Nogent-le-Roi'].map(town => (
+              <span key={town} className="px-4 py-2 bg-[#2a2a2a] rounded-full text-white/80 text-sm">
+                {town}
+              </span>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Info Section */}
+      <section className="py-12 md:py-16 px-4 md:px-8 bg-[#222222]">
         <div className="max-w-4xl mx-auto">
           <div className="bg-[#2a2a2a] rounded-2xl p-8 md:p-12">
             <div className="grid md:grid-cols-2 gap-8">
