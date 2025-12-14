@@ -1,10 +1,16 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, X, Shield } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
+import { Button } from './ui/button';
+import { ScrollArea } from './ui/scroll-area';
 
 const ODELICES_LOGO = "https://customer-assets.emergentagent.com/job_09defda6-ae44-405e-ae59-cb2fa63eebe7/artifacts/y8c8rbve_oDelices%20LOGO.png";
 const HALAL_LOGO = "https://customer-assets.emergentagent.com/job_09defda6-ae44-405e-ae59-cb2fa63eebe7/artifacts/uegijlrg_halal%20white.png";
 
 export default function Footer({ showPrivacyPolicy = true }) {
+  const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
+
   return (
     <>
       <footer className="bg-[#111111] py-8 px-4 md:px-8">
@@ -39,83 +45,171 @@ export default function Footer({ showPrivacyPolicy = true }) {
             </div>
           </div>
 
-          {/* Privacy Policy */}
+          {/* Privacy Policy Link */}
           {showPrivacyPolicy && (
-            <div className="mt-8 pt-8 border-t border-white/10">
-              <details className="group">
-                <summary className="cursor-pointer text-primary font-semibold text-lg mb-4 flex items-center gap-2 hover:text-primary/80 transition-colors">
-                  <span>Politique de confidentialité</span>
-                  <ChevronRight className="w-5 h-5 transform group-open:rotate-90 transition-transform" />
-                </summary>
-                <div className="text-white/70 text-sm space-y-4 pl-2 max-w-4xl">
-                  <p className="text-white/50 italic">Mis à jour le 18/04/2025</p>
-                  
-                  <p>Votre vie privée est importante pour nous. Cette politique de confidentialité explique comment nous collectons, utilisons et protégeons vos informations personnelles lorsque vous utilisez notre site Web et nos services de commande en ligne.</p>
-                  
-                  <div>
-                    <h4 className="text-white font-semibold mb-2">Collecte d'informations</h4>
-                    <p className="mb-2">Nous collectons les informations suivantes lorsque vous utilisez notre site Web :</p>
-                    <ul className="list-disc list-inside space-y-1 pl-2">
-                      <li>Vos coordonnées (nom, adresse, numéro de téléphone, adresse e-mail).</li>
-                      <li><strong>Informations de paiement:</strong> Si vous choisissez de payer en ligne, veuillez noter que nous ne stockons pas votre numéro de la carte bancaire dans notre base de données. Tous les paiements par carte bancaire sont 100% sécurisés. Vos données bancaires, y compris le numéro de carte et la date d'expiration, sont cryptées à l'aide de la technologie SSL. Elles ne circulent pas en clair sur Internet et ne peuvent être interceptées.</li>
-                      <li>Informations de commande (articles commandés, historique des commandes).</li>
-                    </ul>
-                  </div>
-
-                  <div>
-                    <h4 className="text-white font-semibold mb-2">Utilisation des informations</h4>
-                    <p className="mb-2">Nous utilisons les informations collectées pour :</p>
-                    <ul className="list-disc list-inside space-y-1 pl-2">
-                      <li>Faciliter le processus de commande en ligne et la livraison.</li>
-                      <li>Communiquer avec vous concernant vos commandes et offres spéciales.</li>
-                      <li>Améliorer notre site Web et nos services.</li>
-                    </ul>
-                  </div>
-
-                  <div>
-                    <h4 className="text-white font-semibold mb-2">Partage des informations</h4>
-                    <p className="mb-2">Nous ne partageons vos informations personnelles qu'avec des tiers dans les circonstances suivantes :</p>
-                    <ul className="list-disc list-inside space-y-1 pl-2">
-                      <li>Avec les prestataires de paiement pour le traitement des paiements en ligne.</li>
-                      <li>Avec les prestataires de livraison pour effectuer les livraisons.</li>
-                    </ul>
-                  </div>
-
-                  <div>
-                    <h4 className="text-white font-semibold mb-2">Sécurité des informations</h4>
-                    <p>Nous mettons en place des mesures de sécurité pour protéger vos informations personnelles. Cependant, aucune méthode de transmission sur Internet ni de stockage électronique n'est totalement sécurisée. Nous ne pouvons garantir la sécurité de vos informations.</p>
-                  </div>
-
-                  <div>
-                    <h4 className="text-white font-semibold mb-2">Vos choix</h4>
-                    <p>Vous pouvez :</p>
-                    <ul className="list-disc list-inside space-y-1 pl-2">
-                      <li>Accéder, mettre à jour ou supprimer vos informations personnelles en vous connectant à votre compte.</li>
-                    </ul>
-                  </div>
-
-                  <div>
-                    <h4 className="text-white font-semibold mb-2">Médiation de la consommation</h4>
-                    <p>Conformément aux articles L.616-1 et R.616-1 du Code de la consommation, nous informons nos clients qu'en cas de litige, ils peuvent recourir à un médiateur de la consommation. Les coordonnées du médiateur auquel nous adhérons seront communiquées sur simple demande.</p>
-                  </div>
-
-                  <div>
-                    <h4 className="text-white font-semibold mb-2">Opposition au démarchage téléphonique</h4>
-                    <p>Conformément à l'article L.223-2 du Code de la consommation, si nous sommes amenés à recueillir vos données téléphoniques, vous êtes informés de votre droit à vous inscrire gratuitement sur la liste d'opposition au démarchage téléphonique Bloctel (<a href="https://www.bloctel.gouv.fr" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">www.bloctel.gouv.fr</a>).</p>
-                  </div>
-
-                  <div>
-                    <h4 className="text-white font-semibold mb-2">Contact</h4>
-                    <p>Si vous avez des questions concernant cette politique de confidentialité, veuillez nous contacter sur la page <Link to="/contact" className="text-primary hover:underline">Contact</Link>.</p>
-                  </div>
-
-                  <p className="pt-4 border-t border-white/10 text-white/50">Merci d'utiliser notre service de commande en ligne.</p>
-                </div>
-              </details>
+            <div className="mt-8 pt-8 border-t border-white/10 text-center">
+              <button
+                onClick={() => setIsPrivacyOpen(true)}
+                className="inline-flex items-center gap-2 text-primary font-semibold hover:text-primary/80 transition-colors group"
+              >
+                <Shield className="w-5 h-5" />
+                <span>Politique de confidentialité</span>
+                <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </button>
             </div>
           )}
         </div>
       </footer>
+
+      {/* Privacy Policy Popup */}
+      <Dialog open={isPrivacyOpen} onOpenChange={setIsPrivacyOpen}>
+        <DialogContent className="max-w-3xl max-h-[90vh] bg-[#1a1a1a] border-white/10 p-0 overflow-hidden">
+          <DialogHeader className="px-6 py-4 border-b border-white/10 bg-[#222222]">
+            <DialogTitle className="flex items-center gap-3 text-xl text-white">
+              <Shield className="w-6 h-6 text-primary" />
+              Politique de confidentialité
+            </DialogTitle>
+          </DialogHeader>
+          
+          <ScrollArea className="h-[70vh] px-6 py-4">
+            <div className="text-white/70 text-sm space-y-6">
+              <p className="text-white/50 italic text-xs">Mis à jour le 18/04/2025</p>
+              
+              <p className="text-base">
+                Votre vie privée est importante pour nous. Cette politique de confidentialité explique comment nous collectons, utilisons et protégeons vos informations personnelles lorsque vous utilisez notre site Web et nos services de commande en ligne.
+              </p>
+              
+              <div className="p-4 bg-white/5 rounded-xl border border-white/10">
+                <h4 className="text-white font-semibold mb-3 flex items-center gap-2">
+                  <span className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary text-sm">1</span>
+                  Collecte d'informations
+                </h4>
+                <p className="mb-3 text-white/60">Nous collectons les informations suivantes lorsque vous utilisez notre site Web :</p>
+                <ul className="list-none space-y-2 pl-2">
+                  <li className="flex items-start gap-2">
+                    <span className="text-primary mt-1">•</span>
+                    <span>Vos coordonnées (nom, adresse, numéro de téléphone, adresse e-mail).</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-primary mt-1">•</span>
+                    <span><strong className="text-white">Informations de paiement:</strong> Si vous choisissez de payer en ligne, veuillez noter que nous ne stockons pas votre numéro de la carte bancaire dans notre base de données. Tous les paiements par carte bancaire sont 100% sécurisés. Vos données bancaires, y compris le numéro de carte et la date d'expiration, sont cryptées à l'aide de la technologie SSL. Elles ne circulent pas en clair sur Internet et ne peuvent être interceptées.</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-primary mt-1">•</span>
+                    <span>Informations de commande (articles commandés, historique des commandes).</span>
+                  </li>
+                </ul>
+              </div>
+
+              <div className="p-4 bg-white/5 rounded-xl border border-white/10">
+                <h4 className="text-white font-semibold mb-3 flex items-center gap-2">
+                  <span className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary text-sm">2</span>
+                  Utilisation des informations
+                </h4>
+                <p className="mb-3 text-white/60">Nous utilisons les informations collectées pour :</p>
+                <ul className="list-none space-y-2 pl-2">
+                  <li className="flex items-start gap-2">
+                    <span className="text-primary mt-1">•</span>
+                    <span>Faciliter le processus de commande en ligne et la livraison.</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-primary mt-1">•</span>
+                    <span>Communiquer avec vous concernant vos commandes et offres spéciales.</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-primary mt-1">•</span>
+                    <span>Améliorer notre site Web et nos services.</span>
+                  </li>
+                </ul>
+              </div>
+
+              <div className="p-4 bg-white/5 rounded-xl border border-white/10">
+                <h4 className="text-white font-semibold mb-3 flex items-center gap-2">
+                  <span className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary text-sm">3</span>
+                  Partage des informations
+                </h4>
+                <p className="mb-3 text-white/60">Nous ne partageons vos informations personnelles qu'avec des tiers dans les circonstances suivantes :</p>
+                <ul className="list-none space-y-2 pl-2">
+                  <li className="flex items-start gap-2">
+                    <span className="text-primary mt-1">•</span>
+                    <span>Avec les prestataires de paiement pour le traitement des paiements en ligne.</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-primary mt-1">•</span>
+                    <span>Avec les prestataires de livraison pour effectuer les livraisons.</span>
+                  </li>
+                </ul>
+              </div>
+
+              <div className="p-4 bg-white/5 rounded-xl border border-white/10">
+                <h4 className="text-white font-semibold mb-3 flex items-center gap-2">
+                  <span className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary text-sm">4</span>
+                  Sécurité des informations
+                </h4>
+                <p className="text-white/60">Nous mettons en place des mesures de sécurité pour protéger vos informations personnelles. Cependant, aucune méthode de transmission sur Internet ni de stockage électronique n'est totalement sécurisée. Nous ne pouvons garantir la sécurité de vos informations.</p>
+              </div>
+
+              <div className="p-4 bg-white/5 rounded-xl border border-white/10">
+                <h4 className="text-white font-semibold mb-3 flex items-center gap-2">
+                  <span className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary text-sm">5</span>
+                  Vos choix
+                </h4>
+                <p className="text-white/60">Vous pouvez :</p>
+                <ul className="list-none space-y-2 pl-2 mt-2">
+                  <li className="flex items-start gap-2">
+                    <span className="text-primary mt-1">•</span>
+                    <span>Accéder, mettre à jour ou supprimer vos informations personnelles en vous connectant à votre compte.</span>
+                  </li>
+                </ul>
+              </div>
+
+              <div className="p-4 bg-white/5 rounded-xl border border-white/10">
+                <h4 className="text-white font-semibold mb-3 flex items-center gap-2">
+                  <span className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary text-sm">6</span>
+                  Médiation de la consommation
+                </h4>
+                <p className="text-white/60">Conformément aux articles L.616-1 et R.616-1 du Code de la consommation, nous informons nos clients qu'en cas de litige, ils peuvent recourir à un médiateur de la consommation. Les coordonnées du médiateur auquel nous adhérons seront communiquées sur simple demande.</p>
+              </div>
+
+              <div className="p-4 bg-white/5 rounded-xl border border-white/10">
+                <h4 className="text-white font-semibold mb-3 flex items-center gap-2">
+                  <span className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary text-sm">7</span>
+                  Opposition au démarchage téléphonique
+                </h4>
+                <p className="text-white/60">
+                  Conformément à l'article L.223-2 du Code de la consommation, si nous sommes amenés à recueillir vos données téléphoniques, vous êtes informés de votre droit à vous inscrire gratuitement sur la liste d'opposition au démarchage téléphonique Bloctel (
+                  <a href="https://www.bloctel.gouv.fr" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">www.bloctel.gouv.fr</a>
+                  ).
+                </p>
+              </div>
+
+              <div className="p-4 bg-white/5 rounded-xl border border-white/10">
+                <h4 className="text-white font-semibold mb-3 flex items-center gap-2">
+                  <span className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary text-sm">8</span>
+                  Contact
+                </h4>
+                <p className="text-white/60">
+                  Si vous avez des questions concernant cette politique de confidentialité, veuillez nous contacter sur la page{' '}
+                  <Link to="/contact" className="text-primary hover:underline" onClick={() => setIsPrivacyOpen(false)}>Contact</Link>.
+                </p>
+              </div>
+
+              <div className="pt-4 border-t border-white/10 text-center">
+                <p className="text-white/40 text-xs">Merci d'utiliser notre service de commande en ligne.</p>
+              </div>
+            </div>
+          </ScrollArea>
+
+          <div className="px-6 py-4 border-t border-white/10 bg-[#222222]">
+            <Button 
+              onClick={() => setIsPrivacyOpen(false)}
+              className="w-full bg-primary hover:bg-primary/90 text-black font-semibold rounded-full"
+            >
+              J'ai compris
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Footer spacing for mobile nav */}
       <div className="h-20 md:h-0 bg-[#111111]" />
