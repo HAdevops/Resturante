@@ -8,6 +8,7 @@ import { Button } from '../components/ui/button';
 import { Card } from '../components/ui/card';
 import { Skeleton } from '../components/ui/skeleton';
 import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 import { useCart } from '../contexts/CartContext';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
