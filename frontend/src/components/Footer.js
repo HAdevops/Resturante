@@ -8,10 +8,39 @@ import { ScrollArea } from './ui/scroll-area';
 const ODELICES_LOGO = "https://customer-assets.emergentagent.com/job_09defda6-ae44-405e-ae59-cb2fa63eebe7/artifacts/y8c8rbve_oDelices%20LOGO.png";
 const HALAL_LOGO = "https://customer-assets.emergentagent.com/job_09defda6-ae44-405e-ae59-cb2fa63eebe7/artifacts/uegijlrg_halal%20white.png";
 
-// Payment card logos (using SVG data URIs for reliability)
-const VISA_LOGO = "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Visa_Inc._logo.svg/200px-Visa_Inc._logo.svg.png";
-const MASTERCARD_LOGO = "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Mastercard-logo.svg/200px-Mastercard-logo.svg.png";
-const CB_LOGO = "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Carte_Bancaire.svg/100px-Carte_Bancaire.svg.png";
+// SVG Card Icons as components for reliability
+const VisaIcon = () => (
+  <svg viewBox="0 0 48 48" className="h-8 w-12">
+    <rect fill="#1565C0" x="0" y="10" width="48" height="28" rx="4"/>
+    <path fill="#FFF" d="M19.5 28.5h-3.8l2.4-14h3.8L19.5 28.5zM32.8 14.8c-.8-.3-2-.6-3.5-.6-3.8 0-6.5 2-6.5 4.8 0 2.1 1.9 3.3 3.4 4 1.5.7 2 1.2 2 1.9 0 1-.1.2 1.5-2.4 1.5 0 2.5-.5 3.2-.8l.5 2.8c-.8.4-2.3.7-3.8.7-4 0-6.8-2.1-6.8-5.1 0-3.4 3-5.1 6.2-5.1 1.7 0 3.1.4 3.9.7L32.8 14.8zM38.1 28.5h3.5l-3-14h-3.1c-.7 0-1.3.4-1.6 1l-5.4 13h3.8l.8-2.1h4.6L38.1 28.5zM35.5 23.8l1.9-5.2 1.1 5.2H35.5zM15.3 14.5l-3.6 9.5-.4-1.9c-.7-2.3-2.8-4.8-5.2-6l3.2 12.3h3.8l5.7-14H15.3z"/>
+    <path fill="#FFC107" d="M9.6 14.5H4l0 .3c4.5 1.1 7.5 4 8.7 7.3l-1.3-6.3C11.2 14.9 10.5 14.5 9.6 14.5z"/>
+  </svg>
+);
+
+const MastercardIcon = () => (
+  <svg viewBox="0 0 48 48" className="h-8 w-12">
+    <rect fill="#3F51B5" x="0" y="10" width="48" height="28" rx="4"/>
+    <circle fill="#E53935" cx="19" cy="24" r="9"/>
+    <circle fill="#FF9800" cx="29" cy="24" r="9"/>
+    <path fill="#FF7043" d="M24 17.2c2.2 1.7 3.6 4.3 3.6 7.3s-1.4 5.6-3.6 7.3c-2.2-1.7-3.6-4.3-3.6-7.3S21.8 18.9 24 17.2z"/>
+  </svg>
+);
+
+const CBIcon = () => (
+  <svg viewBox="0 0 48 48" className="h-8 w-12">
+    <rect fill="#0D47A1" x="0" y="10" width="48" height="28" rx="4"/>
+    <rect fill="#4CAF50" x="4" y="14" width="18" height="10" rx="2"/>
+    <rect fill="#4CAF50" x="4" y="26" width="18" height="8" rx="2"/>
+    <text x="28" y="28" fill="#FFF" fontSize="10" fontWeight="bold" fontFamily="Arial">CB</text>
+  </svg>
+);
+
+const AmexIcon = () => (
+  <svg viewBox="0 0 48 48" className="h-8 w-12">
+    <rect fill="#2196F3" x="0" y="10" width="48" height="28" rx="4"/>
+    <text x="24" y="28" fill="#FFF" fontSize="8" fontWeight="bold" fontFamily="Arial" textAnchor="middle">AMEX</text>
+  </svg>
+);
 
 export default function Footer({ showPrivacyPolicy = true }) {
   const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
