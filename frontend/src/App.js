@@ -1,53 +1,69 @@
-import { useEffect } from "react";
-import "@/App.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import axios from "axios";
+import { Toaster } from "./components/ui/sonner";
+import { AuthProvider } from "./contexts/AuthContext";
+import { CartProvider } from "./contexts/CartContext";
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
+import HomePage from "./pages/HomePage";
+import MenuPage from "./pages/MenuPage";
+import CartPage from "./pages/CartPage";
+import CheckoutPage from "./pages/CheckoutPage";
+import TrackingPage from "./pages/TrackingPage";
+import ContactPage from "./pages/ContactPage";
+import LoginPage from "./pages/LoginPage";
+import RegisterPage from "./pages/RegisterPage";
 
-const Home = () => {
-  const helloWorldApi = async () => {
-    try {
-      const response = await axios.get(`${API}/`);
-      console.log(response.data.message);
-    } catch (e) {
-      console.error(e, `errored out requesting / api`);
-    }
-  };
+import KitchenDashboard from "./pages/dashboards/KitchenDashboard";
+import CashierDashboard from "./pages/dashboards/CashierDashboard";
+import DriverDashboard from "./pages/dashboards/DriverDashboard";
+import AdminDashboard from "./pages/dashboards/AdminDashboard";
 
-  useEffect(() => {
-    helloWorldApi();
-  }, []);
+import ProtectedRoute from "./components/ProtectedRoute";
 
-  return (
-    <div>
-      <header className="App-header">
-        <a
-          className="App-link"
-          href="https://emergent.sh"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <img src="https://avatars.githubusercontent.com/in/1201222?s=120&u=2686cf91179bbafbc7a71bfbc43004cf9ae1acea&v=4" />
-        </a>
-        <p className="mt-5">Building something incredible ~!</p>
-      </header>
-    </div>
-  );
-};
+import "./App.css";
 
 function App() {
   return (
-    <div className="App">
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Home />}>
-            <Route index element={<Home />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
-    </div>
+    <AuthProvider>
+      <CartProvider>
+        <BrowserRouter>
+          <div className="App dark">
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/menu" element={<MenuPage />} />
+              <Route path="/panier" element={<CartPage />} />
+              <Route path="/paiement" element={<CheckoutPage />} />
+              <Route path="/suivi/:orderNumber" element={<TrackingPage />} />
+              <Route path="/suivi" element={<TrackingPage />} />
+              <Route path="/contact" element={<ContactPage />} />
+              <Route path="/connexion" element={<LoginPage />} />
+              <Route path="/inscription" element={<RegisterPage />} />
+              
+              <Route path="/dashboard/cuisine" element={
+                <ProtectedRoute allowedRoles={["CUISINE", "SUPER_ADMIN"]}>
+                  <KitchenDashboard />
+                </ProtectedRoute>
+              } />
+              <Route path="/dashboard/caisse" element={
+                <ProtectedRoute allowedRoles={["CAISSE", "SUPER_ADMIN"]}>
+                  <CashierDashboard />
+                </ProtectedRoute>
+              } />
+              <Route path="/dashboard/livreur" element={
+                <ProtectedRoute allowedRoles={["LIVREUR", "SUPER_ADMIN"]}>
+                  <DriverDashboard />
+                </ProtectedRoute>
+              } />
+              <Route path="/dashboard/admin" element={
+                <ProtectedRoute allowedRoles={["SUPER_ADMIN"]}>
+                  <AdminDashboard />
+                </ProtectedRoute>
+              } />
+            </Routes>
+            <Toaster richColors position="top-center" />
+          </div>
+        </BrowserRouter>
+      </CartProvider>
+    </AuthProvider>
   );
 }
 
