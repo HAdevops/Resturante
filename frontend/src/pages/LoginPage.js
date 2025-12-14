@@ -101,6 +101,8 @@ export default function LoginPage() {
           </p>
         </Card>
       </div>
+
+      <Footer showPrivacyPolicy={false} />
     </div>
   );
 }
