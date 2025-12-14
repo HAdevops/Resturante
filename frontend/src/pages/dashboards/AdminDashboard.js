@@ -301,8 +301,8 @@ export default function AdminDashboard() {
                 </div>
                 <div className="space-y-2">
                   {categories.map(cat => (
-                    <div key={cat.id} className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                      <span>{cat.nom}</span>
+                    <div key={cat.id} className="flex items-center justify-between p-2 bg-gray-100 rounded">
+                      <span className="text-gray-900 font-medium">{cat.nom}</span>
                       <Button variant="ghost" size="icon" onClick={() => deleteCategory(cat.id)}>
                         <Trash2 className="w-4 h-4 text-red-500" />
                       </Button>
@@ -380,14 +380,14 @@ export default function AdminDashboard() {
                 </div>
                 <div className="space-y-2 max-h-96 overflow-y-auto">
                   {products.map(prod => (
-                    <div key={prod.id} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                    <div key={prod.id} className="flex items-center justify-between p-2 bg-gray-100 rounded">
                       <div>
-                        <p className="font-medium">{prod.nom}</p>
-                        <p className="text-sm text-gray-500 font-mono">{prod.prix.toFixed(2)} €</p>
+                        <p className="font-medium text-gray-900">{prod.nom}</p>
+                        <p className="text-sm text-gray-600 font-mono">{prod.prix.toFixed(2)} €</p>
                       </div>
                       <div className="flex gap-1">
                         <Button variant="ghost" size="icon" onClick={() => setEditProduct(prod)}>
-                          <Edit className="w-4 h-4" />
+                          <Edit className="w-4 h-4 text-gray-600" />
                         </Button>
                         <Button variant="ghost" size="icon" onClick={() => deleteProduct(prod.id)}>
                           <Trash2 className="w-4 h-4 text-red-500" />
