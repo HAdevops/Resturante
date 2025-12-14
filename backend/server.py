@@ -593,11 +593,13 @@ async def mark_delivered(order_id: str, user: dict = Depends(require_roles([Role
     return {"message": "Livrée"}
 
 @api_router.post("/orders/{order_id}/mark-paid")
-async def mark_paid(order_id: str, user: dict = Depends(require_roles([Role.CAISSE, Role.SUPER_ADMIN]))):
+async def mark_paid(order_id: str, user: dict = Depends(require_roles([Role.CAISSE, Role.SUPER_ADMIN, Role.LIVREUR]))):
     now = datetime.now(timezone.utc).isoformat()
     result = await db.orders.update_one({"id": order_id}, {"$set": {"payment_status": PaymentStatus.PAID.value, "updated_at": now}})
     if result.matched_count == 0:
         raise HTTPException(status_code=400, detail="Commande non trouvée")
+    # Broadcast payment received event
+    await manager.broadcast({"event": "order.paid", "order_id": order_id}, "cashier")
     return {"message": "Paiement marqué comme reçu"}
 
 @api_router.post("/orders/{order_id}/cancel")
