@@ -4,7 +4,7 @@ import json
 from datetime import datetime
 
 class ODelicesAPITester:
-    def __init__(self, base_url="https://odelices-order.preview.emergentagent.com/api"):
+    def __init__(self, base_url="https://restaurant-hub-34.preview.emergentagent.com/api"):
         self.base_url = base_url
         self.token = None
         self.tests_run = 0
