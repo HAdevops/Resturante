@@ -474,7 +474,8 @@ export default function HomePage() {
                 <h3 className="text-xl font-bold text-white mb-4">Nous trouver</h3>
                 <p className="text-white/70 mb-2">3 Rue à la Paille</p>
                 <p className="text-white/70 mb-4">28230 Épernon, France</p>
-                <p className="text-primary font-semibold">Tél: 02 37 83 XX XX</p>
+                <p className="text-primary font-semibold">Tél: 02 19 02 30 94</p>
+                <p className="text-primary font-semibold">&  06 26 79 16 29</p>
               </div>
               <div>
                 <h3 className="text-xl font-bold text-white mb-4">Horaires</h3>
