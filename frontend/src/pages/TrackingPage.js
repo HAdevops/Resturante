@@ -205,6 +205,8 @@ export default function TrackingPage() {
           )}
         </div>
       </div>
+
+      <Footer showPrivacyPolicy={false} />
     </div>
   );
 }
