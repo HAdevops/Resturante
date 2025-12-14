@@ -1,25 +1,82 @@
 <!doctype html>
-<html lang="en">
+<html lang="fr">
     <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="theme-color" content="#000000" />
-        <meta name="description" content="A product of emergent.sh" />
-        <!--
-      manifest.json provides metadata used when your web app is installed on a
-      user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
-    -->
-        <!--
-      Notice the use of %PUBLIC_URL% in the tags above.
-      It will be replaced with the URL of the `public` folder during the build.
-      Only files inside the `public` folder can be referenced from the HTML.
-
-      Unlike "/favicon.ico" or "favicon.ico", "%PUBLIC_URL%/favicon.ico" will
-      work correctly both with client-side routing and a non-root public URL.
-      Learn how to configure a non-root public URL by running `npm run build`.
-    -->
-        <title>Emergent | Fullstack App</title>
+        <meta name="theme-color" content="#1a1a1a" />
+        <meta name="description" content="O'Delices Épernon - Fast food halal : tacos, burgers, pizzas, kebabs. Livraison à domicile et à emporter. Commandez en ligne 02 19 02 30 94" />
+        <meta name="keywords" content="fast food halal épernon, tacos halal, burger halal, pizza halal, kebab halal, livraison épernon, restaurant halal 28230" />
+        <meta name="author" content="O'Delices Épernon" />
+        <meta name="robots" content="index, follow" />
+        <link rel="canonical" href="https://odelices-epernon.fr/" />
+        
+        <!-- Open Graph / Facebook -->
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://odelices-epernon.fr/" />
+        <meta property="og:title" content="O'Delices Épernon - Fast Food Halal | Tacos, Burgers, Pizzas" />
+        <meta property="og:description" content="Commandez vos tacos, burgers, pizzas et kebabs halal à Épernon. Livraison rapide et gratuite. 100% Halal." />
+        <meta property="og:image" content="https://customer-assets.emergentagent.com/job_09defda6-ae44-405e-ae59-cb2fa63eebe7/artifacts/y8c8rbve_oDelices%20LOGO.png" />
+        <meta property="og:locale" content="fr_FR" />
+        <meta property="og:site_name" content="O'Delices Épernon" />
+        
+        <!-- Twitter -->
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:url" content="https://odelices-epernon.fr/" />
+        <meta name="twitter:title" content="O'Delices Épernon - Fast Food Halal" />
+        <meta name="twitter:description" content="Commandez vos tacos, burgers, pizzas et kebabs halal à Épernon. Livraison rapide." />
+        <meta name="twitter:image" content="https://customer-assets.emergentagent.com/job_09defda6-ae44-405e-ae59-cb2fa63eebe7/artifacts/y8c8rbve_oDelices%20LOGO.png" />
+        
+        <!-- Geo tags for local SEO -->
+        <meta name="geo.region" content="FR-28" />
+        <meta name="geo.placename" content="Épernon" />
+        <meta name="geo.position" content="48.6056;1.6672" />
+        <meta name="ICBM" content="48.6056, 1.6672" />
+        
+        <title>O'Delices Épernon | Fast Food Halal - Tacos, Burgers, Pizzas, Kebabs</title>
         <script src="https://assets.emergent.sh/scripts/emergent-main.js"></script>
+        
+        <!-- JSON-LD Schema for Restaurant -->
+        <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "Restaurant",
+            "name": "O'Delices",
+            "image": "https://customer-assets.emergentagent.com/job_09defda6-ae44-405e-ae59-cb2fa63eebe7/artifacts/y8c8rbve_oDelices%20LOGO.png",
+            "url": "https://odelices-epernon.fr",
+            "telephone": "+33219023094",
+            "priceRange": "€€",
+            "servesCuisine": ["Halal", "Fast Food", "Tacos", "Burgers", "Pizza", "Kebab"],
+            "address": {
+                "@type": "PostalAddress",
+                "streetAddress": "3 Rue à la Paille",
+                "addressLocality": "Épernon",
+                "postalCode": "28230",
+                "addressCountry": "FR"
+            },
+            "geo": {
+                "@type": "GeoCoordinates",
+                "latitude": 48.6056,
+                "longitude": 1.6672
+            },
+            "openingHoursSpecification": [
+                {
+                    "@type": "OpeningHoursSpecification",
+                    "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+                    "opens": "11:30",
+                    "closes": "14:30"
+                },
+                {
+                    "@type": "OpeningHoursSpecification",
+                    "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+                    "opens": "18:00",
+                    "closes": "22:30"
+                }
+            ],
+            "hasMenu": "https://odelices-epernon.fr/menu",
+            "acceptsReservations": "False",
+            "sameAs": []
+        }
+        </script>
     </head>
     <body>
         <noscript>You need to enable JavaScript to run this app.</noscript>
