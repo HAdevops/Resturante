@@ -334,7 +334,12 @@ export default function DriverDashboard() {
                     ))}
                     <div className="flex justify-between items-center font-bold mt-2 pt-2 border-t border-gray-700">
                       <span>Total</span>
-                      <span className="font-mono text-xl text-amber-400">{delivery.total_amount.toFixed(2)} €</span>
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono text-xl text-amber-400">{delivery.total_amount.toFixed(2)} €</span>
+                        {delivery.payment_status === 'PAID' && (
+                          <Badge className="bg-green-500 text-xs">✓ PAYÉ</Badge>
+                        )}
+                      </div>
                     </div>
                     {delivery.payment_status !== 'PAID' && (
                       <div className="mt-2 p-2 bg-red-500/20 rounded-lg text-center">
