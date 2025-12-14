@@ -8,6 +8,7 @@ import { Card } from '../components/ui/card';
 import { RadioGroup, RadioGroupItem } from '../components/ui/radio-group';
 import { Label } from '../components/ui/label';
 import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 import { useCart } from '../contexts/CartContext';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
