@@ -161,6 +161,8 @@ export default function RegisterPage() {
           </p>
         </Card>
       </div>
+
+      <Footer showPrivacyPolicy={false} />
     </div>
   );
 }
