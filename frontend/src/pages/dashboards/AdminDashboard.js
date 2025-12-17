@@ -150,6 +150,40 @@ export default function AdminDashboard() {
     }
   };
 
+  const exportData = async (scope) => {
+    setExportLoading(scope);
+    try {
+      const response = await axios.get(`${API}/admin/exports/${scope}`, {
+        responseType: 'blob'
+      });
+      
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `export_${scope}_${new Date().toISOString().split('T')[0]}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      
+      toast.success(`Export ${scope} téléchargé`);
+    } catch (err) {
+      toast.error('Erreur lors de l\'export');
+    } finally {
+      setExportLoading(null);
+    }
+  };
+
+  const claimLoyaltyReward = async (phone) => {
+    try {
+      await axios.post(`${API}/loyalty/${phone}/claim`, {});
+      toast.success('Récompense marquée comme réclamée');
+      fetchData();
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Erreur');
+    }
+  };
+
   const createCategory = async () => {
     try {
       await axios.post(`${API}/menu/categories`, newCategory);
