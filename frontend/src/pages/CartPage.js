@@ -28,6 +28,8 @@ export default function CartPage() {
     setDeliveryAddress,
     deliveryNotes,
     setDeliveryNotes,
+    deliveryNote,
+    setDeliveryNote,
     customerInfo,
     setCustomerInfo
   } = useCart();
