@@ -211,7 +211,12 @@ export default function MenuPage() {
         </div>
       </div>
 
-      <Footer />
+      {/* Upsell Popup */}
+      <UpsellPopup 
+        isOpen={showUpsellPopup} 
+        onClose={closeUpsellPopup}
+        onGoToCheckout={handleGoToCheckout}
+      />
     </div>
   );
 }
