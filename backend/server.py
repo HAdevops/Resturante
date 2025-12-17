@@ -1430,7 +1430,7 @@ async def websocket_endpoint(websocket: WebSocket, room: str):
 
 @api_router.get("/")
 async def root():
-    return {"message": "O'Delices API", "version": "1.0.0"}
+    return {"message": "O'Delices API", "version": "2.0.1"}
 
 app.include_router(api_router)
 
