@@ -180,9 +180,9 @@ class ODelicesAPITester:
             self.log("⚠️ Skipping order tests - no test product available", "WARN")
             return
         
-        # Create order
+        # Create order with delivery_note (v1.2.0 feature)
         success, order = self.run_test(
-            "Create Order",
+            "Create Order with delivery_note",
             "POST",
             "/orders",
             200,
@@ -193,12 +193,19 @@ class ODelicesAPITester:
                 "customer_email": "test@example.com",
                 "type_fulfillment": "LIVRAISON",
                 "delivery_address": "123 Test Street",
+                "delivery_notes": "No onions please",
+                "delivery_note": "Digicode: 1234, 3ème étage, porte droite",
                 "payment_mode": "A_LA_LIVRAISON"
             }
         )
         if success and 'id' in order:
             self.test_order_id = order['id']
             self.log(f"✅ Order created: {order.get('order_number')}")
+            # Verify delivery_note is stored
+            if 'delivery_note' in order:
+                self.log(f"✅ delivery_note stored: {order['delivery_note']}")
+            else:
+                self.log("❌ delivery_note not found in response")
         
         # Get orders (requires admin/staff token)
         if self.admin_token:
@@ -210,14 +217,16 @@ class ODelicesAPITester:
                 token=self.admin_token
             )
         
-        # Get specific order
+        # Get specific order and verify delivery_note
         if self.test_order_id:
-            self.run_test(
+            success, order_details = self.run_test(
                 "Get Specific Order",
                 "GET",
                 f"/orders/{self.test_order_id}",
                 200
             )
+            if success and 'delivery_note' in order_details:
+                self.log(f"✅ delivery_note retrieved: {order_details['delivery_note']}")
 
     def test_kitchen_operations(self):
         """Test kitchen dashboard operations"""
