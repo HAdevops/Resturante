@@ -331,6 +331,12 @@ export default function DriverDashboard() {
                         <span className="text-gray-300">{delivery.delivery_address}</span>
                       </p>
                     )}
+                    {delivery.delivery_note && (
+                      <div className="p-2 bg-amber-500/20 border border-amber-500/40 rounded-lg">
+                        <p className="text-amber-400 font-semibold text-xs mb-1">📋 Note client</p>
+                        <p className="text-white text-sm">{delivery.delivery_note}</p>
+                      </div>
+                    )}
                     <p className="flex items-center gap-2 text-sm">
                       <Clock className="w-4 h-4 text-gray-500" />
                       <span className="text-gray-500">{formatTime(delivery.created_at)}</span>
