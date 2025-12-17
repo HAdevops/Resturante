@@ -24,7 +24,8 @@ const CATEGORY_IMAGES = {
   'Paninis': 'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=600&q=80',
   'Snacks': 'https://images.unsplash.com/photo-1630384060421-cb20d0e0649d?w=600&q=80',
   'Desserts': 'https://images.unsplash.com/photo-1551024601-bec78aea704b?w=600&q=80',
-  'Boissons': 'https://images.unsplash.com/photo-1581006852262-e4307cf6283a?w=600&q=80'
+  'Boissons': 'https://images.unsplash.com/photo-1581006852262-e4307cf6283a?w=600&q=80',
+  'Menus': 'https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?w=600&q=80'
 };
 
 export default function MenuPage() {
