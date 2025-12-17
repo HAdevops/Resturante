@@ -222,6 +222,15 @@ export default function DriverDashboard() {
                         <span className="text-white">{delivery.delivery_address}</span>
                       </div>
                     )}
+                    {delivery.delivery_note && (
+                      <div className="flex items-start gap-3 p-3 bg-amber-500/20 border border-amber-500/40 rounded-lg">
+                        <FileText className="w-5 h-5 text-amber-400 mt-1" />
+                        <div>
+                          <span className="text-amber-400 font-semibold text-sm">Note client</span>
+                          <p className="text-white">{delivery.delivery_note}</p>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   <div className="flex items-center justify-between p-3 bg-white/10 rounded-lg mb-4">
