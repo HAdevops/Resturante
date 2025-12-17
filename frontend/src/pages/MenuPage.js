@@ -72,14 +72,15 @@ export default function MenuPage() {
 
   const handleAddToCart = (product) => {
     const category = categories.find(c => c.id === product.category_id);
+    const wasEmpty = itemCount === 0;
     addItem(product, 1, null, category?.nom);
     toast.success(`${product.nom} ajouté au panier`);
     
-    // Trigger upsell popup after first item is added
-    if (itemCount === 0) {
+    // Trigger upsell popup after first item is added (when cart was empty)
+    if (wasEmpty) {
       setTimeout(() => {
         triggerUpsellPopup();
-      }, 500);
+      }, 800);
     }
   };
 
