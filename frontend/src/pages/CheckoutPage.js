@@ -116,6 +116,7 @@ export default function CheckoutPage() {
         type_fulfillment: fulfillmentType,
         delivery_address: fulfillmentType === 'LIVRAISON' ? deliveryAddress : null,
         delivery_notes: deliveryNotes || null,
+        delivery_note: fulfillmentType === 'LIVRAISON' ? deliveryNote : null,
         payment_mode: paymentMode
       };
 
