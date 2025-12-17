@@ -397,13 +397,15 @@ class ODelicesAPITester:
             self.log(f"   Eligible for reward: {response.get('is_eligible_for_reward', False)}")
         
         # Test get all loyalty accounts (admin only)
-        self.run_test(
+        success, accounts = self.run_test(
             "Get All Loyalty Accounts",
             "GET",
             "/loyalty/all",
             200,
             token=self.admin_token
         )
+        if success:
+            self.log(f"   Total loyalty accounts: {len(accounts)}")
         
         # Test claim loyalty reward (staff only) - only if eligible
         if success and response.get('is_eligible_for_reward'):
