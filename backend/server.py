@@ -1087,7 +1087,7 @@ async def stripe_webhook(request: Request):
         return {"received": True}
 
 # ========== CAPACITY SCHEDULING ENDPOINTS ==========
-@api_router.get("/orders/active-count", response_model=ActiveOrderCountResponse)
+@api_router.get("/capacity/active-count", response_model=ActiveOrderCountResponse)
 async def get_active_order_count():
     """Return current active order count for capacity rules - Public endpoint for checkout"""
     counts = await get_active_order_counts()
