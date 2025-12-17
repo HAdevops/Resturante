@@ -206,6 +206,7 @@ class SettingsUpdate(BaseModel):
     cloudflare_account_id: Optional[str] = None
     cloudflare_api_token: Optional[str] = None
     paiement_hors_ligne_enabled: Optional[bool] = None
+    delivery_time_slots_enabled: Optional[bool] = None  # Toggle for delivery slot selection
 
 # ========== LOYALTY PROGRAM MODELS ==========
 class LoyaltyAccountResponse(BaseModel):
