@@ -317,13 +317,44 @@ class ODelicesAPITester:
         )
         
         # Get settings
-        self.run_test(
+        success, settings = self.run_test(
             "Get Settings",
             "GET",
             "/admin/settings",
             200,
             token=self.admin_token
         )
+        
+        # Test delivery_time_slots_enabled toggle (v1.2.0 feature)
+        if success:
+            current_value = settings.get('delivery_time_slots_enabled', True)
+            self.log(f"✅ Current delivery_time_slots_enabled: {current_value}")
+            
+            # Toggle the setting
+            new_value = not current_value
+            success, updated_settings = self.run_test(
+                "Update delivery_time_slots_enabled Setting",
+                "PUT",
+                "/admin/settings",
+                200,
+                data={"delivery_time_slots_enabled": new_value},
+                token=self.admin_token
+            )
+            
+            if success and updated_settings.get('delivery_time_slots_enabled') == new_value:
+                self.log(f"✅ delivery_time_slots_enabled updated to: {new_value}")
+                
+                # Restore original value
+                self.run_test(
+                    "Restore delivery_time_slots_enabled Setting",
+                    "PUT",
+                    "/admin/settings",
+                    200,
+                    data={"delivery_time_slots_enabled": current_value},
+                    token=self.admin_token
+                )
+            else:
+                self.log("❌ delivery_time_slots_enabled update failed")
         
         # Create test user
         self.run_test(
