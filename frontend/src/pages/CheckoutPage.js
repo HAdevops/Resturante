@@ -9,6 +9,8 @@ import { RadioGroup, RadioGroupItem } from '../components/ui/radio-group';
 import { Label } from '../components/ui/label';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import LoyaltyPopup from '../components/LoyaltyPopup';
+import DeliverySlotSelector from '../components/DeliverySlotSelector';
 import { useCart } from '../contexts/CartContext';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -25,18 +27,30 @@ export default function CheckoutPage() {
     deliveryAddress,
     deliveryNotes,
     customerInfo,
+    deliverySlot,
+    setDeliverySlot,
     clearCart
   } = useCart();
 
   const [paymentMode, setPaymentMode] = useState('EN_LIGNE');
   const [loading, setLoading] = useState(false);
   const [checkingPayment, setCheckingPayment] = useState(!!sessionId);
+  const [showLoyaltyPopup, setShowLoyaltyPopup] = useState(false);
+  const [loyaltyChecked, setLoyaltyChecked] = useState(false);
 
   useEffect(() => {
     if (sessionId) {
       pollPaymentStatus(sessionId);
     }
   }, [sessionId]);
+
+  // Check loyalty status on mount
+  useEffect(() => {
+    if (customerInfo.phone && !loyaltyChecked) {
+      setShowLoyaltyPopup(true);
+      setLoyaltyChecked(true);
+    }
+  }, [customerInfo.phone, loyaltyChecked]);
 
   const pollPaymentStatus = async (sid, attempts = 0) => {
     const maxAttempts = 5;
@@ -170,6 +184,17 @@ export default function CheckoutPage() {
             </div>
           </Card>
 
+          {/* Delivery Slot Selector - Only for delivery orders */}
+          {fulfillmentType === 'LIVRAISON' && (
+            <Card className="p-6 mb-6">
+              <h2 className="font-semibold text-lg mb-4">Créneau de livraison</h2>
+              <DeliverySlotSelector 
+                onSlotSelected={setDeliverySlot}
+                selectedSlot={deliverySlot}
+              />
+            </Card>
+          )}
+
           <Card className="p-6 mb-6">
             <h2 className="font-semibold text-lg mb-4">Mode de paiement</h2>
             
@@ -226,6 +251,13 @@ export default function CheckoutPage() {
       </div>
 
       <Footer showPrivacyPolicy={false} />
+
+      {/* Loyalty Popup */}
+      <LoyaltyPopup 
+        phone={customerInfo.phone}
+        isOpen={showLoyaltyPopup}
+        onClose={() => setShowLoyaltyPopup(false)}
+      />
     </div>
   );
 }
