@@ -114,7 +114,7 @@ export default function UpsellPopup({ isOpen, onClose, onGoToCheckout }) {
             Envie de compléter votre commande ? 🍟
           </DialogTitle>
           <p className="text-white/60 mt-2">
-            Ajoutez facilement une boisson, un snack ou un dessert.
+            Ajoutez rapidement un extra avant de passer au paiement.
           </p>
         </DialogHeader>
         
