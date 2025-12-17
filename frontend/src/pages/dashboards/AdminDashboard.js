@@ -911,6 +911,162 @@ export default function AdminDashboard() {
             </Card>
           </TabsContent>
 
+          {/* Loyalty Tab */}
+          <TabsContent value="loyalty">
+            <div className="space-y-6">
+              <Card className="p-6 bg-white">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-3">
+                    <Gift className="w-8 h-8 text-amber-500" />
+                    <div>
+                      <h3 className="text-xl font-bold text-gray-900">Programme de Fidélité</h3>
+                      <p className="text-sm text-gray-500">10 commandes = 1 cadeau offert à la 11ème</p>
+                    </div>
+                  </div>
+                  <Badge className="bg-green-500 text-white px-4 py-2 text-lg">
+                    {loyaltyAccounts.filter(a => a.is_eligible_for_reward).length} éligibles
+                  </Badge>
+                </div>
+
+                <div className="grid grid-cols-3 gap-4 mb-6">
+                  <Card className="p-4 bg-amber-50 border-amber-200">
+                    <p className="text-sm text-amber-700">Clients inscrits</p>
+                    <p className="text-3xl font-bold text-amber-900">{loyaltyAccounts.length}</p>
+                  </Card>
+                  <Card className="p-4 bg-green-50 border-green-200">
+                    <p className="text-sm text-green-700">Récompenses données</p>
+                    <p className="text-3xl font-bold text-green-900">
+                      {loyaltyAccounts.reduce((sum, a) => sum + a.rewards_claimed, 0)}
+                    </p>
+                  </Card>
+                  <Card className="p-4 bg-blue-50 border-blue-200">
+                    <p className="text-sm text-blue-700">Commandes totales (fidélité)</p>
+                    <p className="text-3xl font-bold text-blue-900">
+                      {loyaltyAccounts.reduce((sum, a) => sum + a.orders_count, 0)}
+                    </p>
+                  </Card>
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b bg-gray-50">
+                        <th className="text-left p-3 font-semibold text-gray-700">Téléphone</th>
+                        <th className="text-left p-3 font-semibold text-gray-700">Commandes</th>
+                        <th className="text-left p-3 font-semibold text-gray-700">Récompenses</th>
+                        <th className="text-left p-3 font-semibold text-gray-700">Statut</th>
+                        <th className="text-left p-3 font-semibold text-gray-700">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {loyaltyAccounts.map(account => (
+                        <tr key={account.phone} className={`border-b hover:bg-gray-50 ${account.is_eligible_for_reward ? 'bg-amber-50' : ''}`}>
+                          <td className="p-3 font-mono text-gray-900">{account.phone}</td>
+                          <td className="p-3">
+                            <div className="flex items-center gap-2">
+                              <span className="text-gray-900 font-bold">{account.orders_count}</span>
+                              <div className="w-24 bg-gray-200 rounded-full h-2">
+                                <div 
+                                  className="bg-amber-500 h-2 rounded-full" 
+                                  style={{ width: `${Math.min((account.orders_count % 10) * 10, 100)}%` }}
+                                />
+                              </div>
+                            </div>
+                          </td>
+                          <td className="p-3 text-gray-700">{account.rewards_claimed}</td>
+                          <td className="p-3">
+                            {account.is_eligible_for_reward ? (
+                              <Badge className="bg-amber-500 animate-pulse">
+                                <Gift className="w-3 h-3 mr-1" />
+                                Éligible!
+                              </Badge>
+                            ) : (
+                              <Badge variant="outline" className="text-gray-500">
+                                {10 - (account.orders_count % 10)} restantes
+                              </Badge>
+                            )}
+                          </td>
+                          <td className="p-3">
+                            {account.is_eligible_for_reward && (
+                              <Button 
+                                size="sm" 
+                                className="bg-green-500 hover:bg-green-600"
+                                onClick={() => claimLoyaltyReward(account.phone)}
+                              >
+                                <CheckCircle className="w-4 h-4 mr-1" />
+                                Marquer donné
+                              </Button>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {loyaltyAccounts.length === 0 && (
+                  <div className="text-center py-12 text-gray-500">
+                    <Gift className="w-16 h-16 mx-auto mb-4 opacity-30" />
+                    <p>Aucun compte fidélité pour le moment</p>
+                    <p className="text-sm">Les comptes sont créés automatiquement lors des commandes</p>
+                  </div>
+                )}
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Exports Tab */}
+          <TabsContent value="exports">
+            <Card className="p-6 bg-white">
+              <div className="flex items-center gap-3 mb-6">
+                <FileSpreadsheet className="w-8 h-8 text-blue-500" />
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900">Centre d'Exports</h3>
+                  <p className="text-sm text-gray-500">Téléchargez vos données au format CSV</p>
+                </div>
+              </div>
+
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {[
+                  { scope: 'orders', label: 'Commandes', icon: ShoppingCart, color: 'blue', desc: 'Toutes les commandes avec détails' },
+                  { scope: 'order_items', label: 'Articles commandés', icon: Package, color: 'green', desc: 'Détail des produits par commande' },
+                  { scope: 'customers_basic', label: 'Clients', icon: Users, color: 'purple', desc: 'Liste des clients avec statistiques' },
+                  { scope: 'loyalty_accounts', label: 'Comptes fidélité', icon: Gift, color: 'amber', desc: 'Programme de fidélité' },
+                  { scope: 'loyalty_events', label: 'Événements fidélité', icon: Clock, color: 'orange', desc: 'Historique des points' },
+                  { scope: 'menu_products', label: 'Produits', icon: UtensilsCrossed, color: 'red', desc: 'Menu complet avec prix' },
+                  { scope: 'users', label: 'Utilisateurs', icon: Users, color: 'indigo', desc: 'Staff et administrateurs' },
+                ].map(({ scope, label, icon: Icon, color, desc }) => (
+                  <Card 
+                    key={scope} 
+                    className={`p-4 border-2 border-${color}-100 hover:border-${color}-300 transition-colors cursor-pointer`}
+                    onClick={() => exportData(scope)}
+                  >
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className={`w-10 h-10 rounded-lg bg-${color}-100 flex items-center justify-center`}>
+                        <Icon className={`w-5 h-5 text-${color}-600`} />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-gray-900">{label}</h4>
+                        <p className="text-xs text-gray-500">{desc}</p>
+                      </div>
+                    </div>
+                    <Button 
+                      className={`w-full bg-${color}-500 hover:bg-${color}-600`}
+                      disabled={exportLoading === scope}
+                    >
+                      {exportLoading === scope ? (
+                        <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                      ) : (
+                        <Download className="w-4 h-4 mr-2" />
+                      )}
+                      {exportLoading === scope ? 'Export...' : 'Télécharger CSV'}
+                    </Button>
+                  </Card>
+                ))}
+              </div>
+            </Card>
+          </TabsContent>
+
           {/* Settings Tab */}
           <TabsContent value="settings">
             {settings && (
