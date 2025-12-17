@@ -197,11 +197,12 @@ export default function CheckoutPage() {
               <p><strong>Téléphone:</strong> {customerInfo.phone}</p>
               <p><strong>Mode:</strong> {fulfillmentType === 'LIVRAISON' ? 'Livraison' : 'À emporter'}</p>
               {deliveryAddress && <p><strong>Adresse:</strong> {deliveryAddress}</p>}
+              {deliveryNote && <p><strong>Note livreur:</strong> {deliveryNote}</p>}
             </div>
           </Card>
 
-          {/* Delivery Slot Selector - Only for delivery orders */}
-          {fulfillmentType === 'LIVRAISON' && (
+          {/* Delivery Slot Selector - Only for delivery orders when enabled */}
+          {fulfillmentType === 'LIVRAISON' && checkoutConfig.delivery_time_slots_enabled && (
             <Card className="p-6 mb-6">
               <h2 className="font-semibold text-lg mb-4">Créneau de livraison</h2>
               <DeliverySlotSelector 
