@@ -1434,6 +1434,13 @@ async def startup():
     await db.orders.create_index("order_number", unique=True)
     await db.products.create_index("id", unique=True)
     await db.categories.create_index("id", unique=True)
+    # Loyalty program indexes
+    await db.loyalty_accounts.create_index("phone", unique=True)
+    await db.loyalty_accounts.create_index("id", unique=True)
+    await db.loyalty_events.create_index("id", unique=True)
+    await db.loyalty_events.create_index("phone")
+    await db.loyalty_events.create_index("order_id")
+    
     admin = await db.users.find_one({"role": Role.SUPER_ADMIN.value})
     if not admin:
         await db.users.insert_one({
