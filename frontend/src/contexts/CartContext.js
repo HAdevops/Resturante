@@ -2,6 +2,9 @@ import { createContext, useContext, useState, useEffect } from 'react';
 
 const CartContext = createContext(null);
 
+// Categories that should skip the upsell popup
+const UPSELL_SKIP_CATEGORIES = ['Boissons', 'Snacks', 'Desserts'];
+
 export function CartProvider({ children }) {
   const [items, setItems] = useState(() => {
     const saved = localStorage.getItem('cart');
@@ -15,12 +18,17 @@ export function CartProvider({ children }) {
     phone: '',
     email: ''
   });
+  const [deliverySlot, setDeliverySlot] = useState(null);
+  const [showUpsellPopup, setShowUpsellPopup] = useState(false);
+  const [upsellShownThisSession, setUpsellShownThisSession] = useState(() => {
+    return sessionStorage.getItem('upsell_shown') === 'true';
+  });
 
   useEffect(() => {
     localStorage.setItem('cart', JSON.stringify(items));
   }, [items]);
 
-  const addItem = (product, quantity = 1, options = null) => {
+  const addItem = (product, quantity = 1, options = null, categoryName = null) => {
     setItems(prev => {
       const existingIndex = prev.findIndex(
         item => item.product.id === product.id && JSON.stringify(item.options) === JSON.stringify(options)
@@ -30,7 +38,7 @@ export function CartProvider({ children }) {
         updated[existingIndex].quantity += quantity;
         return updated;
       }
-      return [...prev, { product, quantity, options }];
+      return [...prev, { product, quantity, options, categoryName }];
     });
   };
 
@@ -54,6 +62,27 @@ export function CartProvider({ children }) {
     setItems([]);
     setDeliveryAddress('');
     setDeliveryNotes('');
+    setDeliverySlot(null);
+  };
+
+  // Check if cart already contains upsell category items
+  const hasUpsellCategoryItems = () => {
+    return items.some(item => 
+      UPSELL_SKIP_CATEGORIES.includes(item.categoryName)
+    );
+  };
+
+  // Trigger upsell popup if conditions are met
+  const triggerUpsellPopup = () => {
+    if (!upsellShownThisSession && !hasUpsellCategoryItems() && items.length > 0) {
+      setShowUpsellPopup(true);
+      setUpsellShownThisSession(true);
+      sessionStorage.setItem('upsell_shown', 'true');
+    }
+  };
+
+  const closeUpsellPopup = () => {
+    setShowUpsellPopup(false);
   };
 
   const total = items.reduce((sum, item) => sum + item.product.prix * item.quantity, 0);
@@ -75,7 +104,13 @@ export function CartProvider({ children }) {
       deliveryNotes,
       setDeliveryNotes,
       customerInfo,
-      setCustomerInfo
+      setCustomerInfo,
+      deliverySlot,
+      setDeliverySlot,
+      showUpsellPopup,
+      triggerUpsellPopup,
+      closeUpsellPopup,
+      hasUpsellCategoryItems
     }}>
       {children}
     </CartContext.Provider>
