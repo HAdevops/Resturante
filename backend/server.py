@@ -1173,18 +1173,6 @@ async def claim_loyalty_reward(phone: str, data: LoyaltyClaimRequest, user: dict
     
     return {"message": "Récompense marquée comme réclamée", "rewards_claimed": new_rewards_claimed}
 
-@api_router.get("/loyalty/all", response_model=List[dict])
-async def get_all_loyalty_accounts(user: dict = Depends(require_roles([Role.SUPER_ADMIN]))):
-    """Get all loyalty accounts - Admin only"""
-    accounts = await db.loyalty_accounts.find({}, {"_id": 0}).sort("orders_count", -1).to_list(1000)
-    result = []
-    for account in accounts:
-        cycle = account["orders_count"] // LOYALTY_QUALIFYING_COUNT
-        is_eligible = (account["orders_count"] >= LOYALTY_QUALIFYING_COUNT and 
-                       account["rewards_claimed"] < cycle + 1)
-        result.append({**account, "is_eligible_for_reward": is_eligible})
-    return result
-
 # ========== ADMIN EXPORT ENDPOINTS ==========
 @api_router.get("/admin/exports/{scope}")
 async def export_data(
