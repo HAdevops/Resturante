@@ -664,6 +664,7 @@ async def create_order(data: OrderCreate, user: dict = Depends(get_optional_user
         "type_fulfillment": data.type_fulfillment.value,
         "delivery_address": data.delivery_address,
         "delivery_notes": data.delivery_notes,
+        "delivery_note": data.delivery_note,
         "status": OrderStatus.RECUE.value,
         "total_amount": total,
         "payment_mode": data.payment_mode.value,
