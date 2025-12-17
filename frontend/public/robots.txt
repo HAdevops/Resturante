@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://odelices-epernon.fr/sitemap.xml
+
+# Important pages for SEO
+# Homepage: /
+# Menu: /menu
+# Blog: /blog
+# Contact: /contact

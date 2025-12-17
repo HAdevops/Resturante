@@ -9,6 +9,8 @@ import { Textarea } from '../components/ui/textarea';
 import { Label } from '../components/ui/label';
 import { RadioGroup, RadioGroupItem } from '../components/ui/radio-group';
 import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
+import AddressForm from '../components/AddressForm';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -198,17 +200,10 @@ export default function CartPage() {
                 </div>
 
                 {fulfillmentType === 'LIVRAISON' && (
-                  <div>
-                    <Label htmlFor="address">Adresse de livraison *</Label>
-                    <Textarea
-                      id="address"
-                      value={deliveryAddress}
-                      onChange={(e) => setDeliveryAddress(e.target.value)}
-                      placeholder="Numéro, rue, code postal, ville"
-                      className="mt-1"
-                      data-testid="input-address"
-                    />
-                  </div>
+                  <AddressForm 
+                    address={{ street: '', postalCode: '', city: '' }}
+                    onChange={setDeliveryAddress}
+                  />
                 )}
 
                 <div>
@@ -268,6 +263,8 @@ export default function CartPage() {
           </div>
         </div>
       </div>
+
+      <Footer showPrivacyPolicy={false} />
     </div>
   );
 }

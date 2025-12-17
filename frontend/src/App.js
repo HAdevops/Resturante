@@ -11,6 +11,8 @@ import TrackingPage from "./pages/TrackingPage";
 import ContactPage from "./pages/ContactPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
+import BlogPage from "./pages/BlogPage";
+import BlogPostPage from "./pages/BlogPostPage";
 
 import KitchenDashboard from "./pages/dashboards/KitchenDashboard";
 import CashierDashboard from "./pages/dashboards/CashierDashboard";
@@ -37,6 +39,8 @@ function App() {
               <Route path="/contact" element={<ContactPage />} />
               <Route path="/connexion" element={<LoginPage />} />
               <Route path="/inscription" element={<RegisterPage />} />
+              <Route path="/blog" element={<BlogPage />} />
+              <Route path="/blog/:slug" element={<BlogPostPage />} />
               
               <Route path="/dashboard/cuisine" element={
                 <ProtectedRoute allowedRoles={["CUISINE", "SUPER_ADMIN"]}>

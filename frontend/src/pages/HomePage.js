@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { Button } from '../components/ui/button';
 import { Card } from '../components/ui/card';
 import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 import { useCart } from '../contexts/CartContext';
 import { Helmet } from 'react-helmet';
 
@@ -162,9 +163,13 @@ export default function HomePage() {
             <HalalBadge />
           </div>
           
-          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-serif text-white mb-4 drop-shadow-lg" data-testid="hero-title">
-            O'Delices
-          </h1>
+          {/* Logo */}
+          <img 
+            src="https://customer-assets.emergentagent.com/job_09defda6-ae44-405e-ae59-cb2fa63eebe7/artifacts/y8c8rbve_oDelices%20LOGO.png" 
+            alt="O'Delices Logo" 
+            className="h-32 sm:h-40 md:h-48 lg:h-56 w-auto mx-auto mb-4 drop-shadow-2xl"
+            data-testid="hero-logo"
+          />
           <p className="text-lg md:text-xl text-white/90 mb-2">
             Tacos • Burgers • Pizzas • Kebabs
           </p>
@@ -178,6 +183,13 @@ export default function HomePage() {
             </Button>
           </Link>
         </div>
+
+        {/* Halal Logo - Bottom Right Corner */}
+        <img 
+          src="https://customer-assets.emergentagent.com/job_09defda6-ae44-405e-ae59-cb2fa63eebe7/artifacts/uegijlrg_halal%20white.png"
+          alt="Certifié Halal"
+          className="absolute bottom-6 right-6 md:bottom-10 md:right-10 h-16 md:h-24 w-auto z-10 opacity-90"
+        />
       </section>
 
       {/* Promotions Section */}
@@ -463,13 +475,16 @@ export default function HomePage() {
                 <h3 className="text-xl font-bold text-white mb-4">Nous trouver</h3>
                 <p className="text-white/70 mb-2">3 Rue à la Paille</p>
                 <p className="text-white/70 mb-4">28230 Épernon, France</p>
-                <p className="text-primary font-semibold">Tél: 02 37 83 XX XX</p>
+                <p className="text-white/70 mb-2 font-semibold">Téléphone</p>
+                <p className="text-primary font-semibold">02 19 02 30 94</p>
+                <p className="text-primary font-semibold">06 26 79 16 29</p>
               </div>
               <div>
                 <h3 className="text-xl font-bold text-white mb-4">Horaires</h3>
                 <p className="text-white/70 mb-2">Ouvert 6 jours sur 7</p>
                 <p className="text-white/70 mb-1">11h30 - 14h30</p>
-                <p className="text-white/70">18h00 - 22h30</p>
+                <p className="text-white/70 mb-2">18h00 - 22h00</p>
+                <p className="text-red-400 font-semibold">Fermé tous les lundis</p>
               </div>
             </div>
             
@@ -485,8 +500,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Footer spacing for mobile nav */}
-      <div className="h-20 md:h-0 bg-[#1a1a1a]" />
+      <Footer />
     </div>
   );
 }

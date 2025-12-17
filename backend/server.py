@@ -593,11 +593,13 @@ async def mark_delivered(order_id: str, user: dict = Depends(require_roles([Role
     return {"message": "Livrée"}
 
 @api_router.post("/orders/{order_id}/mark-paid")
-async def mark_paid(order_id: str, user: dict = Depends(require_roles([Role.CAISSE, Role.SUPER_ADMIN]))):
+async def mark_paid(order_id: str, user: dict = Depends(require_roles([Role.CAISSE, Role.SUPER_ADMIN, Role.LIVREUR]))):
     now = datetime.now(timezone.utc).isoformat()
     result = await db.orders.update_one({"id": order_id}, {"$set": {"payment_status": PaymentStatus.PAID.value, "updated_at": now}})
     if result.matched_count == 0:
         raise HTTPException(status_code=400, detail="Commande non trouvée")
+    # Broadcast payment received event
+    await manager.broadcast({"event": "order.paid", "order_id": order_id}, "cashier")
     return {"message": "Paiement marqué comme reçu"}
 
 @api_router.post("/orders/{order_id}/cancel")
@@ -803,6 +805,80 @@ async def stripe_webhook(request: Request):
         logger.error(f"Webhook error: {e}")
         return {"received": True}
 
+# ========== BLOG MODELS ==========
+class BlogPostCreate(BaseModel):
+    title: str
+    slug: str
+    excerpt: str
+    content: str
+    image_url: Optional[str] = None
+    meta_description: str
+    meta_keywords: List[str] = []
+    author: str = "O'Delices"
+    is_published: bool = True
+
+class BlogPostResponse(BaseModel):
+    id: str
+    title: str
+    slug: str
+    excerpt: str
+    content: str
+    image_url: Optional[str]
+    meta_description: str
+    meta_keywords: List[str]
+    author: str
+    is_published: bool
+    created_at: str
+    updated_at: str
+
+# ========== BLOG ENDPOINTS ==========
+@api_router.get("/blog/posts", response_model=List[BlogPostResponse])
+async def get_blog_posts(published_only: bool = True):
+    query = {"is_published": True} if published_only else {}
+    posts = await db.blog_posts.find(query, {"_id": 0}).sort("created_at", -1).to_list(100)
+    return posts
+
+@api_router.get("/blog/posts/{slug}")
+async def get_blog_post(slug: str):
+    post = await db.blog_posts.find_one({"slug": slug}, {"_id": 0})
+    if not post:
+        raise HTTPException(status_code=404, detail="Article non trouvé")
+    return post
+
+@api_router.post("/blog/posts", response_model=BlogPostResponse)
+async def create_blog_post(post: BlogPostCreate, user: dict = Depends(require_roles([Role.SUPER_ADMIN]))):
+    existing = await db.blog_posts.find_one({"slug": post.slug})
+    if existing:
+        raise HTTPException(status_code=400, detail="Un article avec ce slug existe déjà")
+    now = datetime.now(timezone.utc).isoformat()
+    new_post = {
+        "id": str(uuid.uuid4()),
+        **post.dict(),
+        "created_at": now,
+        "updated_at": now
+    }
+    await db.blog_posts.insert_one(new_post)
+    return {k: v for k, v in new_post.items() if k != "_id"}
+
+@api_router.put("/blog/posts/{post_id}")
+async def update_blog_post(post_id: str, post: BlogPostCreate, user: dict = Depends(require_roles([Role.SUPER_ADMIN]))):
+    existing = await db.blog_posts.find_one({"id": post_id})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Article non trouvé")
+    await db.blog_posts.update_one(
+        {"id": post_id},
+        {"$set": {**post.dict(), "updated_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    updated = await db.blog_posts.find_one({"id": post_id}, {"_id": 0})
+    return updated
+
+@api_router.delete("/blog/posts/{post_id}")
+async def delete_blog_post(post_id: str, user: dict = Depends(require_roles([Role.SUPER_ADMIN]))):
+    result = await db.blog_posts.delete_one({"id": post_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Article non trouvé")
+    return {"message": "Article supprimé"}
+
 @app.websocket("/ws/{room}")
 async def websocket_endpoint(websocket: WebSocket, room: str):
     await manager.connect(websocket, room)
@@ -848,6 +924,213 @@ async def startup():
             "created_at": datetime.now(timezone.utc).isoformat()
         })
         logger.info("Admin user created: admin@odelices.fr / admin123")
+    
+    # Seed blog posts if empty
+    blog_count = await db.blog_posts.count_documents({})
+    if blog_count == 0:
+        blog_posts = [
+            {
+                "id": str(uuid.uuid4()),
+                "title": "Commander facilement vos tacos, burgers et pizzas halal à Épernon",
+                "slug": "commander-tacos-burgers-pizzas-halal-epernon",
+                "excerpt": "Découvrez comment commander en ligne chez O'Delices : livraison rapide, à emporter ou sur place. Tacos, burgers, pizzas et kebabs 100% halal à Épernon.",
+                "content": """Avant tout, parlons de vous. Quand la faim se fait sentir, vous cherchez sûrement un repas rapide, gourmand et préparé avec soin. Chez **O'Delices**, nous avons pensé à tout : la **livraison à domicile**, la **commande à emporter** et le **service sur place**. Peu importe votre envie ou votre emploi du temps, nous avons une solution simple et pratique pour vous régaler.
+
+Dès que vous passez commande en ligne, vous entrez dans une expérience gourmande où la qualité et la générosité priment. Nos **tacos halal**, nos **burgers savoureux**, nos **pizzas artisanales** et nos **kebabs généreux** sont faits pour vous offrir une expérience culinaire sans compromis.
+
+### La livraison : le confort sans bouger de chez vous
+
+D'abord, imaginez une soirée pluvieuse. Vous n'avez pas envie de cuisiner, encore moins de sortir. Grâce à notre **service de livraison à Épernon et dans les villes voisines**, votre repas arrive directement chez vous.
+
+Ensuite, la livraison, c'est la garantie de profiter de vos plats préférés sans effort. Plus besoin d'affronter la circulation ou de perdre du temps. Nos livreurs vous apportent vos **pizzas bien chaudes**, vos **tacos généreux**, vos **burgers juteux** à la maison.
+
+Par ailleurs, la livraison, c'est aussi un excellent choix pour vos soirées entre amis ou vos repas en famille. Vous pouvez commander plusieurs plats et composer un menu varié qui plaît à tout le monde.
+
+**Passez commande dès maintenant en ligne et faites-vous livrer sans attendre.**
+
+### L'emporter : rapide, pratique et efficace
+
+Ensuite, parlons des repas à emporter. Vous sortez du travail et vous n'avez pas envie de cuisiner ? Vous cherchez une solution rapide avant de rentrer chez vous ? Notre service **à emporter** est pensé pour ça.
+
+D'un côté, vous évitez les files d'attente. Vous commandez en ligne, vous arrivez, et votre repas est prêt. De l'autre, vous gagnez du temps sans sacrifier le plaisir. Nos **tacos halal généreux**, nos **burgers fondants** et nos **pizzas artisanales** vous accompagnent partout.
+
+**Commandez à emporter dès aujourd'hui et profitez d'un service rapide et pratique.**
+
+### Pourquoi choisir O'Delices à Épernon ?
+
+D'abord, parce que nous plaçons votre satisfaction au cœur de notre métier. Nous savons que vous cherchez à la fois le goût et la praticité. En commandant chez nous, vous gagnez du temps et profitez de repas copieux et savoureux.
+
+Enfin, parce que nous faisons partie de votre quotidien local. Nous livrons à **Épernon** mais aussi dans les communes voisines : **Hanches, Droue-sur-Drouette, Gas, Maintenon, Nogent-le-Roi** et bien d'autres.
+
+**Ne cherchez plus ailleurs : le meilleur fast-food halal d'Épernon est déjà tout proche de vous.**""",
+                "image_url": "https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=1200",
+                "meta_description": "Commander tacos, burgers, pizzas et kebabs halal à Épernon. Livraison rapide, à emporter. O'Delices - votre fast-food halal de qualité.",
+                "meta_keywords": ["tacos halal épernon", "burger halal épernon", "pizza halal épernon", "livraison épernon", "fast food halal 28230"],
+                "author": "O'Delices",
+                "is_published": True,
+                "created_at": "2025-01-15T10:00:00Z",
+                "updated_at": "2025-01-15T10:00:00Z"
+            },
+            {
+                "id": str(uuid.uuid4()),
+                "title": "Les meilleurs tacos halal d'Épernon : découvrez nos recettes",
+                "slug": "meilleurs-tacos-halal-epernon",
+                "excerpt": "Chez O'Delices, nos tacos halal sont préparés avec des ingrédients frais et de qualité. Découvrez nos recettes généreuses qui font la différence.",
+                "content": """Quand on parle de **tacos halal à Épernon**, une adresse sort du lot : **O'Delices**. Nos tacos sont devenus incontournables pour tous les amateurs de saveurs généreuses et authentiques.
+
+### Des ingrédients frais et de qualité
+
+Chez nous, chaque taco est préparé avec soin. La viande est **100% halal**, les légumes sont frais du jour, et nos sauces maison font toute la différence. Du **tacos poulet** au **tacos viande hachée**, en passant par le **tacos mixte**, nous avons de quoi satisfaire toutes les envies.
+
+### Une générosité qui fait la différence
+
+Nos tacos ne sont pas de simples snacks. Ce sont de véritables repas complets, garnis avec générosité. Chaque bouchée est une explosion de saveurs, avec le croustillant de la galette, le fondant de la viande et le croquant des crudités.
+
+### Les garnitures qui font le succès
+
+- **Sauce fromagère** crémeuse et onctueuse
+- **Sauce algérienne** légèrement pimentée
+- **Sauce blanche** fraîche et délicate
+- **Frites croustillantes** directement dans le tacos
+
+### Commander vos tacos préférés
+
+La commande est simple : rendez-vous sur notre site, choisissez votre tacos, personnalisez vos garnitures et sauces, et validez. En livraison ou à emporter, vos tacos arrivent chauds et prêts à être dégustés.
+
+**Commandez vos tacos halal dès maintenant et régalez-vous !**""",
+                "image_url": "https://images.unsplash.com/photo-1624300629298-e9de39c13be5?w=1200",
+                "meta_description": "Meilleurs tacos halal à Épernon. Viande halal, sauces maison, garnitures généreuses. Commandez en ligne chez O'Delices - livraison rapide.",
+                "meta_keywords": ["tacos halal épernon", "meilleur tacos 28230", "tacos livraison épernon", "tacos halal eure-et-loir"],
+                "author": "O'Delices",
+                "is_published": True,
+                "created_at": "2025-02-10T14:00:00Z",
+                "updated_at": "2025-02-10T14:00:00Z"
+            },
+            {
+                "id": str(uuid.uuid4()),
+                "title": "Livraison de pizzas halal à Épernon et alentours",
+                "slug": "livraison-pizzas-halal-epernon",
+                "excerpt": "Faites-vous livrer vos pizzas halal à domicile à Épernon. O'Delices livre également à Hanches, Gas, Droue-sur-Drouette et Maintenon.",
+                "content": """Vous avez envie d'une **pizza halal** bien chaude, livrée directement chez vous ? Chez **O'Delices à Épernon**, nous avons fait de la livraison notre spécialité.
+
+### Un service de livraison rapide et fiable
+
+Notre équipe de livreurs connaît parfaitement Épernon et ses environs. Résultat : votre pizza arrive chaude, dans les meilleurs délais. Nous livrons également dans les communes voisines :
+
+- **Hanches** (5 min)
+- **Gas** (8 min)
+- **Droue-sur-Drouette** (7 min)
+- **Maintenon** (10 min)
+- **Nogent-le-Roi** (12 min)
+
+### Nos pizzas halal les plus populaires
+
+Toutes nos pizzas sont préparées avec des ingrédients **100% halal** et une pâte fraîche du jour :
+
+- **Margherita** : Tomate, mozzarella, basilic frais
+- **Royale** : Tomate, mozzarella, champignons, jambon de dinde halal
+- **Kebab** : Sauce blanche, viande kebab, oignons, tomates
+- **4 Fromages** : Mozzarella, chèvre, emmental, gorgonzola
+- **Orientale** : Merguez halal, poivrons, oignons, olives
+
+### Comment commander ?
+
+1. Rendez-vous sur notre site
+2. Choisissez votre pizza et sa taille
+3. Ajoutez vos accompagnements et boissons
+4. Validez votre commande
+5. Suivez votre livraison en temps réel
+
+**Commandez votre pizza halal maintenant et profitez d'un repas savoureux livré chez vous.**""",
+                "image_url": "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=1200",
+                "meta_description": "Livraison pizza halal Épernon et environs. Pizzas fraîches, viandes halal. Livraison rapide à Hanches, Gas, Maintenon. Commandez en ligne.",
+                "meta_keywords": ["livraison pizza épernon", "pizza halal épernon", "pizzeria halal 28230", "commander pizza épernon"],
+                "author": "O'Delices",
+                "is_published": True,
+                "created_at": "2025-03-05T11:30:00Z",
+                "updated_at": "2025-03-05T11:30:00Z"
+            },
+            {
+                "id": str(uuid.uuid4()),
+                "title": "Burgers halal gourmands : notre sélection chez O'Delices",
+                "slug": "burgers-halal-gourmands-odelices",
+                "excerpt": "Découvrez nos burgers halal préparés avec du bœuf et poulet halal de qualité. Des recettes généreuses et savoureuses à Épernon.",
+                "content": """Les **burgers halal** sont devenus un incontournable de la cuisine fast-food. Chez **O'Delices**, nous avons développé une gamme de burgers qui allie qualité, générosité et saveurs.
+
+### Des viandes 100% halal sélectionnées
+
+Nos steaks sont préparés avec du **bœuf halal** de qualité supérieure. Pour les amateurs de volaille, nous proposons également des **burgers au poulet halal** tout aussi savoureux.
+
+### Notre sélection de burgers
+
+**Le Classic** : Steak haché halal, salade, tomate, oignons, sauce burger
+**Le Cheese Burger** : Steak halal, double cheddar fondu, cornichons, sauce spéciale
+**Le Chicken Burger** : Filet de poulet pané, salade iceberg, sauce mayo maison
+**Le Double** : Double steak halal, double fromage, bacon de dinde, sauce BBQ
+**Le Veggie** : Galette de légumes, avocat, tomates séchées, sauce yaourt
+
+### Les accompagnements parfaits
+
+- Frites maison croustillantes
+- Potatoes épicées
+- Onion rings dorés
+- Nuggets de poulet halal
+
+### Un burger, c'est aussi une expérience
+
+Chez O'Delices, nous pensons qu'un bon burger doit être généreux, savoureux et préparé avec passion. Chaque ingrédient est choisi pour vous offrir la meilleure expérience gustative.
+
+**Commandez votre burger halal et laissez-vous surprendre par nos recettes gourmandes.**""",
+                "image_url": "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=1200",
+                "meta_description": "Burgers halal gourmands à Épernon. Bœuf et poulet halal, recettes généreuses. Commandez en ligne chez O'Delices - livraison ou à emporter.",
+                "meta_keywords": ["burger halal épernon", "hamburger halal 28230", "burger livraison épernon", "fast food halal épernon"],
+                "author": "O'Delices",
+                "is_published": True,
+                "created_at": "2025-04-20T16:00:00Z",
+                "updated_at": "2025-04-20T16:00:00Z"
+            },
+            {
+                "id": str(uuid.uuid4()),
+                "title": "Kebab halal à Épernon : tradition et saveurs orientales",
+                "slug": "kebab-halal-epernon-tradition-saveurs",
+                "excerpt": "Le kebab authentique façon O'Delices : viande grillée halal, pain frais, sauces maison. Découvrez nos recettes orientales à Épernon.",
+                "content": """Le **kebab** est bien plus qu'un simple sandwich : c'est une tradition culinaire qui remonte à des siècles. Chez **O'Delices à Épernon**, nous honorons cette tradition avec des recettes authentiques et des ingrédients de qualité.
+
+### Une viande kebab d'exception
+
+Notre viande kebab est **100% halal**, marinée selon une recette traditionnelle et grillée à la broche. Le résultat : une viande tendre, parfumée et juteuse qui fond dans la bouche.
+
+### Les classiques du kebab
+
+**Kebab Sandwich** : Pain pita frais, viande kebab, salade, tomates, oignons, sauce au choix
+**Kebab Assiette** : Viande kebab généreuse, frites maison, salade fraîche, sauces
+**Kebab Galette** : Grande galette, viande kebab, frites, crudités, sauce fromagère
+**Durum** : Galette roulée, viande kebab, garniture complète, sauce blanche
+
+### Nos sauces signature
+
+- **Sauce blanche** : Crémeuse et fraîche
+- **Sauce samouraï** : Légèrement piquante
+- **Sauce harissa** : Pour les amateurs de sensations fortes
+- **Sauce algérienne** : Douce et parfumée
+
+### L'authenticité au cœur de nos préparations
+
+Chaque kebab est préparé à la commande, avec des ingrédients frais. Le pain est moelleux, la viande généreuse, les légumes croquants. C'est ça, l'expérience O'Delices.
+
+**Commandez votre kebab halal et goûtez à l'authenticité des saveurs orientales.**""",
+                "image_url": "https://images.unsplash.com/photo-1529006557810-274b9b2fc783?w=1200",
+                "meta_description": "Kebab halal authentique à Épernon. Viande grillée halal, sauces maison, pain frais. Commandez en ligne chez O'Delices.",
+                "meta_keywords": ["kebab halal épernon", "kebab livraison épernon", "doner kebab 28230", "kebab à emporter épernon"],
+                "author": "O'Delices",
+                "is_published": True,
+                "created_at": "2025-05-12T09:00:00Z",
+                "updated_at": "2025-05-12T09:00:00Z"
+            }
+        ]
+        await db.blog_posts.insert_many(blog_posts)
+        await db.blog_posts.create_index("slug", unique=True)
+        logger.info(f"Seeded {len(blog_posts)} blog posts")
 
 @app.on_event("shutdown")
 async def shutdown_db_client():

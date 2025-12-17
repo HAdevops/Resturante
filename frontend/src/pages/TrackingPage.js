@@ -6,6 +6,7 @@ import { Input } from '../components/ui/input';
 import { Button } from '../components/ui/button';
 import { Card } from '../components/ui/card';
 import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
@@ -204,6 +205,8 @@ export default function TrackingPage() {
           )}
         </div>
       </div>
+
+      <Footer showPrivacyPolicy={false} />
     </div>
   );
 }
