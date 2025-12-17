@@ -1106,6 +1106,16 @@ async def get_checkout_available_slots():
     slots = await get_available_delivery_slots()
     return slots
 
+@api_router.get("/checkout/config")
+async def get_checkout_config():
+    """Return feature flags relevant to checkout - Public endpoint"""
+    settings = await db.settings.find_one({"id": "main"}, {"_id": 0})
+    return {
+        "delivery_time_slots_enabled": settings.get("delivery_time_slots_enabled", True) if settings else True,
+        "minimum_order": settings.get("minimum_order", 0) if settings else 0,
+        "delivery_fee": settings.get("delivery_fee", 0) if settings else 0
+    }
+
 # ========== LOYALTY PROGRAM ENDPOINTS ==========
 @api_router.get("/loyalty/check/{phone}", response_model=LoyaltyCheckResponse)
 async def check_loyalty_status(phone: str):
