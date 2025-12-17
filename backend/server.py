@@ -741,6 +741,7 @@ async def create_manual_order(data: ManualOrderCreate, user: dict = Depends(requ
         "type_fulfillment": data.type_fulfillment.value,
         "delivery_address": data.delivery_address,
         "delivery_notes": data.delivery_notes,
+        "delivery_note": data.delivery_note,
         "status": OrderStatus.RECUE.value,
         "total_amount": total,
         "payment_mode": data.payment_mode.value,
