@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Plus } from 'lucide-react';
 import { toast } from 'sonner';
@@ -8,7 +8,7 @@ import { Button } from '../components/ui/button';
 import { Card } from '../components/ui/card';
 import { Skeleton } from '../components/ui/skeleton';
 import Navbar from '../components/Navbar';
-import Footer from '../components/Footer';
+import UpsellPopup from '../components/UpsellPopup';
 import { useCart } from '../contexts/CartContext';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
