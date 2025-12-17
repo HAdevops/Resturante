@@ -74,11 +74,15 @@ export function CartProvider({ children }) {
 
   // Trigger upsell popup if conditions are met
   const triggerUpsellPopup = () => {
-    if (!upsellShownThisSession && !hasUpsellCategoryItems() && items.length > 0) {
-      setShowUpsellPopup(true);
-      setUpsellShownThisSession(true);
-      sessionStorage.setItem('upsell_shown', 'true');
-    }
+    // Skip if already shown this session
+    if (upsellShownThisSession) return;
+    
+    // Skip if cart has upsell category items
+    if (hasUpsellCategoryItems()) return;
+    
+    setShowUpsellPopup(true);
+    setUpsellShownThisSession(true);
+    sessionStorage.setItem('upsell_shown', 'true');
   };
 
   const closeUpsellPopup = () => {
