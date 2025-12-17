@@ -309,6 +309,127 @@ class ConnectionManager:
 
 manager = ConnectionManager()
 
+# ========== LOYALTY HELPER FUNCTIONS ==========
+async def get_or_create_loyalty_account(phone: str) -> dict:
+    """Get or create a loyalty account for a phone number"""
+    phone_clean = phone.strip().replace(" ", "")
+    account = await db.loyalty_accounts.find_one({"phone": phone_clean}, {"_id": 0})
+    if not account:
+        now = datetime.now(timezone.utc).isoformat()
+        account = {
+            "id": str(uuid.uuid4()),
+            "phone": phone_clean,
+            "orders_count": 0,
+            "rewards_claimed": 0,
+            "created_at": now,
+            "updated_at": now
+        }
+        await db.loyalty_accounts.insert_one(account)
+    return account
+
+async def increment_loyalty_orders(phone: str, order_id: str) -> dict:
+    """Increment orders count and check for reward eligibility"""
+    phone_clean = phone.strip().replace(" ", "")
+    account = await get_or_create_loyalty_account(phone_clean)
+    
+    new_count = account["orders_count"] + 1
+    now = datetime.now(timezone.utc).isoformat()
+    
+    await db.loyalty_accounts.update_one(
+        {"phone": phone_clean},
+        {"$set": {"orders_count": new_count, "updated_at": now}}
+    )
+    
+    # Log the event
+    event = {
+        "id": str(uuid.uuid4()),
+        "phone": phone_clean,
+        "order_id": order_id,
+        "event_type": "ORDER_COMPLETED",
+        "meta_json": {"new_count": new_count},
+        "created_at": now
+    }
+    await db.loyalty_events.insert_one(event)
+    
+    # Check if eligible for reward (10 orders completed, 11th gets reward)
+    is_eligible = (new_count >= LOYALTY_QUALIFYING_COUNT and 
+                   account["rewards_claimed"] < (new_count // LOYALTY_QUALIFYING_COUNT))
+    
+    return {
+        "phone": phone_clean,
+        "orders_count": new_count,
+        "is_eligible": is_eligible,
+        "rewards_claimed": account["rewards_claimed"]
+    }
+
+async def check_loyalty_eligibility(phone: str) -> dict:
+    """Check if customer is eligible for loyalty reward"""
+    phone_clean = phone.strip().replace(" ", "")
+    account = await db.loyalty_accounts.find_one({"phone": phone_clean}, {"_id": 0})
+    
+    if not account:
+        return {"phone": phone_clean, "orders_count": 0, "is_eligible": False, "message": None}
+    
+    # Eligible when they have 10+ orders and haven't claimed reward for this cycle
+    cycle = account["orders_count"] // LOYALTY_QUALIFYING_COUNT
+    is_eligible = (account["orders_count"] >= LOYALTY_QUALIFYING_COUNT and 
+                   account["rewards_claimed"] < cycle + 1)
+    
+    message = None
+    if is_eligible:
+        message = "Félicitations ! Vous êtes éligible à un cadeau. Signalez-le au comptoir lors du retrait ou au livreur."
+    
+    return {
+        "phone": phone_clean,
+        "orders_count": account["orders_count"],
+        "is_eligible": is_eligible,
+        "message": message,
+        "rewards_claimed": account["rewards_claimed"]
+    }
+
+# ========== CAPACITY SCHEDULING HELPER FUNCTIONS ==========
+async def get_active_order_counts() -> dict:
+    """Get count of active orders by type"""
+    delivery_count = await db.orders.count_documents({
+        "type_fulfillment": FulfillmentType.LIVRAISON.value,
+        "status": {"$in": ACTIVE_STATUSES_FOR_CAPACITY}
+    })
+    
+    takeaway_count = await db.orders.count_documents({
+        "type_fulfillment": FulfillmentType.A_EMPORTER.value,
+        "status": {"$in": ACTIVE_STATUSES_FOR_CAPACITY}
+    })
+    
+    return {
+        "total_active_delivery": delivery_count,
+        "total_active_takeaway": takeaway_count,
+        "threshold": ACTIVE_ORDER_THRESHOLD,
+        "is_at_capacity": delivery_count >= ACTIVE_ORDER_THRESHOLD
+    }
+
+async def get_available_delivery_slots() -> dict:
+    """Get available delivery slots based on capacity"""
+    counts = await get_active_order_counts()
+    
+    if counts["is_at_capacity"]:
+        # Return forced slot window
+        return {
+            "is_at_capacity": True,
+            "forced_slot": {
+                "start_time": "19:30",
+                "end_time": "20:45",
+                "available": True,
+                "message": "Forte affluence : le prochain créneau de livraison disponible est entre 19h30 et 20h45."
+            },
+            "message": "Forte affluence : le prochain créneau de livraison disponible est entre 19h30 et 20h45."
+        }
+    
+    return {
+        "is_at_capacity": False,
+        "forced_slot": None,
+        "message": None
+    }
+
 def hash_password(password: str) -> str:
     return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
