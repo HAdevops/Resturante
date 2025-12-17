@@ -3,7 +3,7 @@ import { createContext, useContext, useState, useEffect } from 'react';
 const CartContext = createContext(null);
 
 // Categories that should skip the upsell popup
-const UPSELL_SKIP_CATEGORIES = ['Boissons', 'Snacks', 'Desserts'];
+const UPSELL_SKIP_CATEGORIES = ['Boissons', 'Snacks', 'Desserts', 'Burgers', 'Sandwichs'];
 
 export function CartProvider({ children }) {
   const [items, setItems] = useState(() => {
