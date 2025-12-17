@@ -1255,12 +1255,12 @@ async def export_data(
             ]
             customers = await db.orders.aggregate(pipeline).to_list(10000)
             if customers:
-                fieldnames = ["_id", "name", "email", "orders_count", "total_spent", "first_order", "last_order"]
+                fieldnames = ["phone", "name", "email", "orders_count", "total_spent", "first_order", "last_order"]
                 writer = csv.DictWriter(output, fieldnames=fieldnames)
                 writer.writeheader()
                 for c in customers:
                     c["phone"] = c.pop("_id")
-                    writer.writerow({"_id": c.get("phone"), **c})
+                    writer.writerow(c)
         
         elif scope == "loyalty_accounts":
             accounts = await db.loyalty_accounts.find({}, {"_id": 0}).to_list(10000)
