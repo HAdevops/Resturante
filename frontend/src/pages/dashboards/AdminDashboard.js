@@ -299,7 +299,7 @@ export default function AdminDashboard() {
 
       <div className="p-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="mb-6 bg-white p-1 rounded-lg shadow">
+          <TabsList className="mb-6 bg-white p-1 rounded-lg shadow flex-wrap">
             <TabsTrigger value="overview" className="px-6">
               <TrendingUp className="w-4 h-4 mr-2" />
               Vue d'ensemble
@@ -315,6 +315,14 @@ export default function AdminDashboard() {
             <TabsTrigger value="users" className="px-6">
               <Users className="w-4 h-4 mr-2" />
               Utilisateurs
+            </TabsTrigger>
+            <TabsTrigger value="loyalty" className="px-6">
+              <Gift className="w-4 h-4 mr-2" />
+              Fidélité
+            </TabsTrigger>
+            <TabsTrigger value="exports" className="px-6">
+              <Download className="w-4 h-4 mr-2" />
+              Exports
             </TabsTrigger>
             <TabsTrigger value="settings" className="px-6">
               <Settings className="w-4 h-4 mr-2" />
