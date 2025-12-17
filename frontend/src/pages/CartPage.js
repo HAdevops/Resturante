@@ -208,6 +208,27 @@ export default function CartPage() {
                   />
                 )}
 
+                {fulfillmentType === 'LIVRAISON' && (
+                  <div>
+                    <Label htmlFor="deliveryNote" className="flex items-center gap-2">
+                      <MapPin className="w-4 h-4" />
+                      Note pour le livreur
+                    </Label>
+                    <Textarea
+                      id="deliveryNote"
+                      value={deliveryNote}
+                      onChange={(e) => setDeliveryNote(e.target.value.slice(0, 280))}
+                      placeholder="Ex : digicode, étage, interphone, porte, instructions d'accès…"
+                      className="mt-1"
+                      maxLength={280}
+                      data-testid="input-delivery-note"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Cette note sera visible uniquement par l'équipe de livraison et la caisse. ({deliveryNote.length}/280)
+                    </p>
+                  </div>
+                )}
+
                 <div>
                   <Label htmlFor="notes" className="flex items-center gap-2">
                     <FileText className="w-4 h-4" />
