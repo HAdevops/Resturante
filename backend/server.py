@@ -830,7 +830,6 @@ async def order_ready(order_id: str, user: dict = Depends(require_roles([Role.CU
     )
     if result.matched_count == 0:
         raise HTTPException(status_code=400, detail="Commande non trouvée")
-    order = await db.orders.find_one({"id": order_id}, {"_id": 0})
     await manager.broadcast({"event": "order.ready", "order_id": order_id}, "cashier")
     await manager.broadcast({"event": "order.ready", "order_id": order_id}, "driver")
     return {"message": "Commande prête"}
