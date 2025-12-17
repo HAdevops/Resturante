@@ -8,6 +8,7 @@ import { Badge } from '../../components/ui/badge';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useNotificationSound } from '../../hooks/useNotificationSound';
+import useWebSocket from '../../hooks/useWebSocket';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
