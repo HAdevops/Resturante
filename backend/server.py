@@ -73,6 +73,22 @@ class Channel(str, Enum):
     WEB = "WEB"
     TELEPHONE = "TELEPHONE"
 
+# ========== CAPACITY SCHEDULING CONSTANTS ==========
+ACTIVE_ORDER_THRESHOLD = 10
+ACTIVE_STATUSES_FOR_CAPACITY = [
+    OrderStatus.RECUE.value,
+    OrderStatus.ACCUSEE_CUISINE.value,
+    OrderStatus.EN_PREPARATION.value,
+    OrderStatus.PRETE.value,
+    OrderStatus.ASSIGNEE_LIVREUR.value,
+    OrderStatus.EN_LIVRAISON.value
+]
+PARIS_TZ = ZoneInfo("Europe/Paris")
+
+# ========== LOYALTY PROGRAM CONSTANTS ==========
+LOYALTY_QUALIFYING_COUNT = 10
+LOYALTY_REWARD_ON_ORDER = 11
+
 class UserCreate(BaseModel):
     email: EmailStr
     password: str
