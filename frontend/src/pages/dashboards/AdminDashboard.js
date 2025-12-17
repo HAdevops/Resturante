@@ -1114,6 +1114,16 @@ export default function AdminDashboard() {
                         onCheckedChange={(v) => setSettings({ ...settings, paiement_hors_ligne_enabled: v })}
                       />
                     </div>
+                    <div className="flex items-center justify-between pt-2 border-t">
+                      <div>
+                        <Label>Créneaux de livraison</Label>
+                        <p className="text-xs text-gray-500 mt-1">Si désactivé, le client ne choisit pas de créneau et la règle d'affluence ne s'applique pas.</p>
+                      </div>
+                      <Switch
+                        checked={settings.delivery_time_slots_enabled !== false}
+                        onCheckedChange={(v) => setSettings({ ...settings, delivery_time_slots_enabled: v })}
+                      />
+                    </div>
                   </div>
                 </Card>
 
