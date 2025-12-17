@@ -29,12 +29,13 @@ const CATEGORY_IMAGES = {
 };
 
 export default function MenuPage() {
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || null);
   const [loading, setLoading] = useState(true);
-  const { addItem } = useCart();
+  const { addItem, showUpsellPopup, triggerUpsellPopup, closeUpsellPopup, itemCount } = useCart();
 
   useEffect(() => {
     fetchMenu();
