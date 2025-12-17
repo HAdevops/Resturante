@@ -616,6 +616,7 @@ async def build_order_response(order: dict) -> OrderResponse:
         type_fulfillment=order["type_fulfillment"],
         delivery_address=order.get("delivery_address"),
         delivery_notes=order.get("delivery_notes"),
+        delivery_note=order.get("delivery_note"),
         status=order["status"],
         total_amount=order["total_amount"],
         payment_mode=order["payment_mode"],
