@@ -58,16 +58,19 @@ export default function AdminDashboard() {
   
   const [editProduct, setEditProduct] = useState(null);
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [loyaltyAccounts, setLoyaltyAccounts] = useState([]);
+  const [exportLoading, setExportLoading] = useState(null);
 
   const fetchData = useCallback(async () => {
     try {
-      const [statsRes, usersRes, categoriesRes, productsRes, settingsRes, ordersRes] = await Promise.all([
+      const [statsRes, usersRes, categoriesRes, productsRes, settingsRes, ordersRes, loyaltyRes] = await Promise.all([
         axios.get(`${API}/admin/stats`),
         axios.get(`${API}/admin/users`),
         axios.get(`${API}/menu/categories`),
         axios.get(`${API}/menu/products`),
         axios.get(`${API}/admin/settings`),
-        axios.get(`${API}/orders`)
+        axios.get(`${API}/orders`),
+        axios.get(`${API}/loyalty/all`).catch(() => ({ data: [] }))
       ]);
       setStats(statsRes.data);
       setUsers(usersRes.data);
@@ -75,6 +78,7 @@ export default function AdminDashboard() {
       setProducts(productsRes.data);
       setSettings(settingsRes.data);
       setOrders(ordersRes.data);
+      setLoyaltyAccounts(loyaltyRes.data || []);
       
       // Calculate detailed stats from orders
       calculateDetailedStats(ordersRes.data);
