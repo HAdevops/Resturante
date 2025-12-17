@@ -519,6 +519,25 @@ export default function CashierDashboard() {
             const statusConfig = STATUS_CONFIG[order.status] || STATUS_CONFIG['REÇUE'];
             return (
               <Card key={order.id} className="p-4 bg-white border-l-4 hover:shadow-lg transition-shadow" style={{ borderLeftColor: statusConfig.color.replace('bg-', '').includes('blue') ? '#3b82f6' : statusConfig.color.replace('bg-', '').includes('green') ? '#22c55e' : statusConfig.color.replace('bg-', '').includes('orange') ? '#f97316' : statusConfig.color.replace('bg-', '').includes('yellow') ? '#eab308' : statusConfig.color.replace('bg-', '').includes('purple') ? '#a855f7' : statusConfig.color.replace('bg-', '').includes('indigo') ? '#6366f1' : statusConfig.color.replace('bg-', '').includes('red') ? '#ef4444' : '#10b981' }} data-testid={`order-card-${order.id}`}>
+                {/* Loyalty Badge */}
+                {order.is_loyalty_eligible && (
+                  <div className="mb-3 p-3 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-lg">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Gift className="w-5 h-5 text-amber-600 animate-bounce" />
+                        <span className="font-semibold text-amber-800">Client fidélité - Cadeau à offrir!</span>
+                      </div>
+                      <Button 
+                        size="sm" 
+                        className="bg-amber-500 hover:bg-amber-600 text-white"
+                        onClick={() => claimLoyaltyReward(order.customer_phone)}
+                      >
+                        ✓ Donné
+                      </Button>
+                    </div>
+                  </div>
+                )}
+                
                 <div className="flex items-center justify-between mb-3">
                   <span className="font-mono font-bold text-xl text-gray-900">{order.order_number}</span>
                   <Badge className={`${statusConfig.color} text-white`}>
