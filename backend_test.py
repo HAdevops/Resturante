@@ -580,6 +580,9 @@ class ODelicesAPITester:
             self.test_loyalty_program()
             self.test_admin_exports()
             
+            # Test v1.2.0 features
+            self.test_checkout_config()
+            
             # Cleanup
             self.cleanup_test_data()
             
