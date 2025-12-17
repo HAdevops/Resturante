@@ -401,6 +401,28 @@ class ODelicesAPITester:
             if response.get('forced_slot'):
                 slot = response['forced_slot']
                 self.log(f"   Forced slot: {slot.get('start_time')} - {slot.get('end_time')}")
+    
+    def test_checkout_config(self):
+        """Test checkout configuration endpoint (v1.2.0 feature)"""
+        self.log("⚙️ Testing Checkout Config (v1.2.0)", "INFO")
+        
+        # Test checkout config endpoint (public)
+        success, response = self.run_test(
+            "Get Checkout Config",
+            "GET",
+            "/checkout/config",
+            200
+        )
+        if success:
+            self.log(f"   delivery_time_slots_enabled: {response.get('delivery_time_slots_enabled')}")
+            self.log(f"   minimum_order: {response.get('minimum_order', 0)}")
+            self.log(f"   delivery_fee: {response.get('delivery_fee', 0)}")
+            
+            # Verify delivery_time_slots_enabled is present
+            if 'delivery_time_slots_enabled' in response:
+                self.log("✅ delivery_time_slots_enabled flag found in checkout config")
+            else:
+                self.log("❌ delivery_time_slots_enabled flag missing from checkout config")
 
     def test_loyalty_program(self):
         """Test loyalty program v2.0 features"""
