@@ -26,6 +26,7 @@ export default function CheckoutPage() {
     fulfillmentType,
     deliveryAddress,
     deliveryNotes,
+    deliveryNote,
     customerInfo,
     deliverySlot,
     setDeliverySlot,
@@ -37,6 +38,20 @@ export default function CheckoutPage() {
   const [checkingPayment, setCheckingPayment] = useState(!!sessionId);
   const [showLoyaltyPopup, setShowLoyaltyPopup] = useState(false);
   const [loyaltyChecked, setLoyaltyChecked] = useState(false);
+  const [checkoutConfig, setCheckoutConfig] = useState({ delivery_time_slots_enabled: true });
+
+  useEffect(() => {
+    fetchCheckoutConfig();
+  }, []);
+
+  const fetchCheckoutConfig = async () => {
+    try {
+      const res = await axios.get(`${API}/checkout/config`);
+      setCheckoutConfig(res.data);
+    } catch (err) {
+      console.error('Error fetching checkout config:', err);
+    }
+  };
 
   useEffect(() => {
     if (sessionId) {
