@@ -204,6 +204,61 @@ class SettingsUpdate(BaseModel):
     cloudflare_api_token: Optional[str] = None
     paiement_hors_ligne_enabled: Optional[bool] = None
 
+# ========== LOYALTY PROGRAM MODELS ==========
+class LoyaltyAccountResponse(BaseModel):
+    phone: str
+    orders_count: int
+    rewards_claimed: int
+    is_eligible_for_reward: bool
+    created_at: str
+    updated_at: str
+
+class LoyaltyClaimRequest(BaseModel):
+    order_id: Optional[str] = None
+
+class LoyaltyCheckResponse(BaseModel):
+    phone: str
+    orders_count: int
+    is_eligible: bool
+    message: Optional[str] = None
+
+# ========== CAPACITY SCHEDULING MODELS ==========
+class ActiveOrderCountResponse(BaseModel):
+    total_active_delivery: int
+    total_active_takeaway: int
+    threshold: int
+    is_at_capacity: bool
+
+class DeliverySlot(BaseModel):
+    start_time: str
+    end_time: str
+    available: bool
+    message: Optional[str] = None
+
+class AvailableSlotsResponse(BaseModel):
+    is_at_capacity: bool
+    forced_slot: Optional[DeliverySlot] = None
+    message: Optional[str] = None
+
+# ========== EXPORT MODELS ==========
+class ExportScope(str, Enum):
+    ORDERS = "orders"
+    ORDER_ITEMS = "order_items"
+    CUSTOMERS_BASIC = "customers_basic"
+    LOYALTY_ACCOUNTS = "loyalty_accounts"
+    LOYALTY_EVENTS = "loyalty_events"
+    MENU_PRODUCTS = "menu_products"
+    USERS = "users"
+    NOTIFICATION_LOGS = "notification_logs"
+
+class ExportFilters(BaseModel):
+    date_from: Optional[str] = None
+    date_to: Optional[str] = None
+    status: Optional[str] = None
+    channel: Optional[str] = None
+    payment_mode: Optional[str] = None
+    delivery_type: Optional[str] = None
+
 class ConnectionManager:
     def __init__(self):
         self.active_connections: Dict[str, List[WebSocket]] = {}
