@@ -46,6 +46,7 @@ export default function CashierDashboard() {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [newOrderOpen, setNewOrderOpen] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
+  const [loyaltyOrder, setLoyaltyOrder] = useState(null);
   const { playBeep, initAudio } = useNotificationSound();
   const previousOrderCount = useRef(0);
   const isFirstLoad = useRef(true);
@@ -58,6 +59,25 @@ export default function CashierDashboard() {
     items: [],
     payment_mode: 'A_LA_LIVRAISON'
   });
+
+  // WebSocket connection for real-time updates
+  const handleWebSocketMessage = useCallback((data) => {
+    if (data.event === 'order.created' || data.event === 'order.status.updated') {
+      fetchData();
+    }
+    if (data.event === 'loyalty.reward.eligible' && data.data) {
+      setLoyaltyOrder(data.data);
+      toast.info(
+        <div className="flex items-center gap-2">
+          <Gift className="w-5 h-5 text-amber-500" />
+          <span>{data.data.message || 'Client éligible fidélité!'}</span>
+        </div>,
+        { duration: 10000 }
+      );
+    }
+  }, []);
+
+  const { isConnected, playOrderNotification, playLoyaltyNotification } = useWebSocket('cashier', handleWebSocketMessage);
 
   const fetchData = useCallback(async () => {
     try {
@@ -101,6 +121,17 @@ export default function CashierDashboard() {
     setSoundEnabled(true);
     playBeep('success');
     toast.success('Notifications sonores activées');
+  };
+
+  const claimLoyaltyReward = async (phone) => {
+    try {
+      const cleanPhone = phone.replace(/\s/g, '');
+      await axios.post(`${API}/loyalty/${cleanPhone}/claim`, {});
+      toast.success('Récompense marquée comme donnée');
+      setLoyaltyOrder(null);
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Erreur');
+    }
   };
 
   const assignDriver = async (orderId, driverId) => {
