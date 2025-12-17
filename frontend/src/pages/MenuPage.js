@@ -71,8 +71,20 @@ export default function MenuPage() {
     : products;
 
   const handleAddToCart = (product) => {
-    addItem(product, 1);
+    const category = categories.find(c => c.id === product.category_id);
+    addItem(product, 1, null, category?.nom);
     toast.success(`${product.nom} ajouté au panier`);
+    
+    // Trigger upsell popup after first item is added
+    if (itemCount === 0) {
+      setTimeout(() => {
+        triggerUpsellPopup();
+      }, 500);
+    }
+  };
+
+  const handleGoToCheckout = () => {
+    navigate('/panier');
   };
 
   return (
