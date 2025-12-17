@@ -643,6 +643,11 @@ async def create_order(data: OrderCreate, user: dict = Depends(get_optional_user
             "quantite": item.quantite,
             "options_snapshot_json": item.options_snapshot_json
         })
+    
+    # Check loyalty eligibility
+    loyalty_status = await check_loyalty_eligibility(data.customer_phone)
+    is_loyalty_eligible = loyalty_status.get("is_eligible", False)
+    
     now = datetime.now(timezone.utc).isoformat()
     order = {
         "id": order_id,
@@ -661,12 +666,37 @@ async def create_order(data: OrderCreate, user: dict = Depends(get_optional_user
         "assigned_driver_id": None,
         "items": items,
         "user_id": user["id"] if user else None,
+        "is_loyalty_eligible": is_loyalty_eligible,
         "created_at": now,
         "updated_at": now
     }
     await db.orders.insert_one(order)
-    await manager.broadcast({"event": "order.created", "order_id": order_id, "order_number": order_number}, "kitchen")
-    await manager.broadcast({"event": "order.created", "order_id": order_id, "order_number": order_number}, "cashier")
+    
+    # Update loyalty account
+    await increment_loyalty_orders(data.customer_phone, order_id)
+    
+    # Broadcast order created with enhanced data
+    order_event_data = {
+        "order_id": order_id,
+        "order_number": order_number,
+        "customer_name": data.customer_name,
+        "customer_phone": data.customer_phone,
+        "total_amount": total,
+        "type_fulfillment": data.type_fulfillment.value,
+        "is_loyalty_eligible": is_loyalty_eligible
+    }
+    await manager.send_order_event("order.created", order_event_data, ["kitchen", "cashier"])
+    
+    # If loyalty eligible, send special notification
+    if is_loyalty_eligible:
+        await manager.send_order_event("loyalty.reward.eligible", {
+            "order_id": order_id,
+            "order_number": order_number,
+            "customer_name": data.customer_name,
+            "customer_phone": data.customer_phone,
+            "message": "Client éligible fidélité (11e commande) — prévoir un cadeau."
+        }, ["cashier"])
+    
     return await build_order_response(order)
 
 @api_router.post("/orders/manual", response_model=OrderResponse)
