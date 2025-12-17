@@ -63,6 +63,7 @@ export function CartProvider({ children }) {
     setItems([]);
     setDeliveryAddress('');
     setDeliveryNotes('');
+    setDeliveryNote('');
     setDeliverySlot(null);
   };
 
