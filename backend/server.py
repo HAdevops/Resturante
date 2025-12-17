@@ -181,6 +181,7 @@ class ManualOrderCreate(BaseModel):
     type_fulfillment: FulfillmentType
     delivery_address: Optional[str] = None
     delivery_notes: Optional[str] = None
+    delivery_note: Optional[str] = None
     payment_mode: PaymentMode = PaymentMode.A_LA_LIVRAISON
 
 class AssignDriverRequest(BaseModel):
