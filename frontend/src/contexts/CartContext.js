@@ -109,6 +109,8 @@ export function CartProvider({ children }) {
       setDeliveryAddress,
       deliveryNotes,
       setDeliveryNotes,
+      deliveryNote,
+      setDeliveryNote,
       customerInfo,
       setCustomerInfo,
       deliverySlot,
