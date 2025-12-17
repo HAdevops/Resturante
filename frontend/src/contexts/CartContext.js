@@ -13,6 +13,7 @@ export function CartProvider({ children }) {
   const [fulfillmentType, setFulfillmentType] = useState('LIVRAISON');
   const [deliveryAddress, setDeliveryAddress] = useState('');
   const [deliveryNotes, setDeliveryNotes] = useState('');
+  const [deliveryNote, setDeliveryNote] = useState(''); // Note for driver (digicode, floor, etc.)
   const [customerInfo, setCustomerInfo] = useState({
     name: '',
     phone: '',
