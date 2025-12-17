@@ -447,7 +447,7 @@ def create_token(user_id: str, role: str) -> str:
 def decode_token(token: str) -> Optional[dict]:
     try:
         return jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
-    except:
+    except Exception:
         return None
 
 async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
