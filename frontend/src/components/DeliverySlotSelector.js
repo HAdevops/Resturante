@@ -19,8 +19,13 @@ export default function DeliverySlotSelector({ onSlotSelected, selectedSlot }) {
 
   const fetchCapacityInfo = async () => {
     try {
-      const res = await axios.get(`${API}/checkout/available-slots`);
-      setCapacityInfo(res.data);
+      const res = await axios.get(`${API}/capacity/active-count`);
+      const slotsRes = await axios.get(`${API}/checkout/available-slots`);
+      
+      setCapacityInfo({
+        ...res.data,
+        ...slotsRes.data
+      });
       
       // Auto-select forced slot if at capacity
       if (res.data.is_at_capacity && res.data.forced_slot && onSlotSelected) {
