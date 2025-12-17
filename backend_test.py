@@ -332,6 +332,122 @@ class ODelicesAPITester:
             token=self.admin_token
         )
 
+    def test_capacity_scheduling(self):
+        """Test capacity scheduling v2.0 features"""
+        self.log("📊 Testing Capacity Scheduling (v2.0)", "INFO")
+        
+        # Test active order count endpoint (public)
+        success, response = self.run_test(
+            "Get Active Order Count",
+            "GET",
+            "/capacity/active-count",
+            200
+        )
+        if success:
+            self.log(f"   Active delivery orders: {response.get('total_active_delivery', 0)}")
+            self.log(f"   Active takeaway orders: {response.get('total_active_takeaway', 0)}")
+            self.log(f"   Threshold: {response.get('threshold', 0)}")
+            self.log(f"   At capacity: {response.get('is_at_capacity', False)}")
+        
+        # Test available slots endpoint (public)
+        success, response = self.run_test(
+            "Get Available Delivery Slots",
+            "GET",
+            "/checkout/available-slots",
+            200
+        )
+        if success:
+            self.log(f"   At capacity: {response.get('is_at_capacity', False)}")
+            if response.get('forced_slot'):
+                slot = response['forced_slot']
+                self.log(f"   Forced slot: {slot.get('start_time')} - {slot.get('end_time')}")
+
+    def test_loyalty_program(self):
+        """Test loyalty program v2.0 features"""
+        self.log("🎁 Testing Loyalty Program (v2.0)", "INFO")
+        
+        test_phone = "0123456789"
+        
+        # Test loyalty check endpoint (public)
+        success, response = self.run_test(
+            "Check Loyalty Status",
+            "GET",
+            f"/loyalty/check/{test_phone}",
+            200
+        )
+        if success:
+            self.log(f"   Phone: {response.get('phone')}")
+            self.log(f"   Orders count: {response.get('orders_count', 0)}")
+            self.log(f"   Is eligible: {response.get('is_eligible', False)}")
+        
+        if not self.admin_token:
+            self.log("⚠️ Skipping staff loyalty tests - no admin token", "WARN")
+            return
+        
+        # Test get loyalty account (staff only)
+        success, response = self.run_test(
+            "Get Loyalty Account",
+            "GET",
+            f"/loyalty/{test_phone}",
+            200,
+            token=self.admin_token
+        )
+        if success:
+            self.log(f"   Rewards claimed: {response.get('rewards_claimed', 0)}")
+            self.log(f"   Eligible for reward: {response.get('is_eligible_for_reward', False)}")
+        
+        # Test get all loyalty accounts (admin only)
+        self.run_test(
+            "Get All Loyalty Accounts",
+            "GET",
+            "/loyalty/all",
+            200,
+            token=self.admin_token
+        )
+        
+        # Test claim loyalty reward (staff only) - only if eligible
+        if success and response.get('is_eligible_for_reward'):
+            self.run_test(
+                "Claim Loyalty Reward",
+                "POST",
+                f"/loyalty/{test_phone}/claim",
+                200,
+                data={"order_id": self.test_order_id},
+                token=self.admin_token
+            )
+
+    def test_admin_exports(self):
+        """Test admin CSV export v2.0 features"""
+        self.log("📊 Testing Admin Exports (v2.0)", "INFO")
+        
+        if not self.admin_token:
+            self.log("⚠️ Skipping export tests - no admin token", "WARN")
+            return
+        
+        # Test various export scopes
+        export_scopes = [
+            "orders",
+            "order_items", 
+            "customers_basic",
+            "loyalty_accounts",
+            "loyalty_events",
+            "menu_products",
+            "users"
+        ]
+        
+        for scope in export_scopes:
+            # Note: These return CSV files, so we expect different content-type
+            # but 200 status should still work
+            success, _ = self.run_test(
+                f"Export {scope.title()}",
+                "GET",
+                f"/admin/exports/{scope}",
+                200,
+                token=self.admin_token
+            )
+            if success:
+                self.log(f"   ✅ {scope} export available")
+
     def test_manual_order_creation(self):
         """Test manual order creation (phone orders)"""
         self.log("📞 Testing Manual Order Creation", "INFO")
