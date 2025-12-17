@@ -511,6 +511,11 @@ class ODelicesAPITester:
             self.test_admin_operations()
             self.test_manual_order_creation()
             
+            # Test v2.0 features
+            self.test_capacity_scheduling()
+            self.test_loyalty_program()
+            self.test_admin_exports()
+            
             # Cleanup
             self.cleanup_test_data()
             
