@@ -9,12 +9,14 @@ import { useCart } from '../contexts/CartContext';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
-const UPSELL_CATEGORIES = ['Boissons', 'Snacks', 'Desserts'];
+const UPSELL_CATEGORIES = ['Boissons', 'Snacks', 'Desserts', 'Burgers', 'Sandwichs'];
 
 const CATEGORY_ICONS = {
   'Boissons': Coffee,
   'Snacks': Cookie,
-  'Desserts': IceCream
+  'Desserts': IceCream,
+  'Burgers': Cookie,
+  'Sandwichs': Cookie
 };
 
 export default function UpsellPopup({ isOpen, onClose, onGoToCheckout }) {
