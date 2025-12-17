@@ -5,7 +5,7 @@ import {
   Calculator, RefreshCw, LogOut, Plus, Phone, User, MapPin, 
   Truck, Package, CreditCard, CheckCircle, XCircle, Clock,
   Volume2, VolumeX, DollarSign, TrendingUp, AlertCircle, Search,
-  Filter, Eye
+  Filter, Eye, Gift
 } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { Card } from '../../components/ui/card';
@@ -18,6 +18,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/ta
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useNotificationSound } from '../../hooks/useNotificationSound';
+import useWebSocket from '../../hooks/useWebSocket';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
