@@ -148,7 +148,8 @@ class OrderCreate(BaseModel):
     customer_email: Optional[str] = None
     type_fulfillment: FulfillmentType
     delivery_address: Optional[str] = None
-    delivery_notes: Optional[str] = None
+    delivery_notes: Optional[str] = None  # Notes for kitchen
+    delivery_note: Optional[str] = None   # Note for driver (digicode, floor, etc.)
     payment_mode: PaymentMode = PaymentMode.EN_LIGNE
 
 class OrderResponse(BaseModel):
@@ -161,6 +162,7 @@ class OrderResponse(BaseModel):
     type_fulfillment: str
     delivery_address: Optional[str]
     delivery_notes: Optional[str]
+    delivery_note: Optional[str]
     status: str
     total_amount: float
     payment_mode: str
