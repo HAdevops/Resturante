@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import axios from 'axios';
 import { toast } from 'sonner';
-import { Clock, ChefHat, CheckCircle, RefreshCw, LogOut, AlertCircle, Utensils, Volume2, VolumeX, Bell } from 'lucide-react';
+import { Clock, ChefHat, CheckCircle, RefreshCw, LogOut, AlertCircle, Utensils, Volume2, VolumeX, Wifi, WifiOff, Gift, Bell } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { Card } from '../../components/ui/card';
 import { Badge } from '../../components/ui/badge';
