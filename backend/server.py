@@ -1027,6 +1027,247 @@ async def stripe_webhook(request: Request):
         logger.error(f"Webhook error: {e}")
         return {"received": True}
 
+# ========== CAPACITY SCHEDULING ENDPOINTS ==========
+@api_router.get("/orders/active-count", response_model=ActiveOrderCountResponse)
+async def get_active_order_count():
+    """Return current active order count for capacity rules - Public endpoint for checkout"""
+    counts = await get_active_order_counts()
+    return counts
+
+@api_router.get("/checkout/available-slots", response_model=AvailableSlotsResponse)
+async def get_checkout_available_slots():
+    """Return available delivery slots after applying capacity rules - Public endpoint"""
+    slots = await get_available_delivery_slots()
+    return slots
+
+# ========== LOYALTY PROGRAM ENDPOINTS ==========
+@api_router.get("/loyalty/check/{phone}", response_model=LoyaltyCheckResponse)
+async def check_loyalty_status(phone: str):
+    """Public endpoint to check loyalty status for checkout popup"""
+    result = await check_loyalty_eligibility(phone)
+    return result
+
+@api_router.get("/loyalty/{phone}", response_model=LoyaltyAccountResponse)
+async def get_loyalty_account(phone: str, user: dict = Depends(require_roles([Role.CAISSE, Role.SUPER_ADMIN]))):
+    """Get loyalty account details for a customer - Staff only"""
+    phone_clean = phone.strip().replace(" ", "")
+    account = await db.loyalty_accounts.find_one({"phone": phone_clean}, {"_id": 0})
+    if not account:
+        raise HTTPException(status_code=404, detail="Compte fidélité non trouvé")
+    
+    # Calculate eligibility
+    cycle = account["orders_count"] // LOYALTY_QUALIFYING_COUNT
+    is_eligible = (account["orders_count"] >= LOYALTY_QUALIFYING_COUNT and 
+                   account["rewards_claimed"] < cycle + 1)
+    
+    return {
+        **account,
+        "is_eligible_for_reward": is_eligible
+    }
+
+@api_router.post("/loyalty/{phone}/claim")
+async def claim_loyalty_reward(phone: str, data: LoyaltyClaimRequest, user: dict = Depends(require_roles([Role.CAISSE, Role.SUPER_ADMIN]))):
+    """Mark reward as claimed for the given phone - Staff only"""
+    phone_clean = phone.strip().replace(" ", "")
+    account = await db.loyalty_accounts.find_one({"phone": phone_clean}, {"_id": 0})
+    if not account:
+        raise HTTPException(status_code=404, detail="Compte fidélité non trouvé")
+    
+    # Check eligibility
+    cycle = account["orders_count"] // LOYALTY_QUALIFYING_COUNT
+    is_eligible = (account["orders_count"] >= LOYALTY_QUALIFYING_COUNT and 
+                   account["rewards_claimed"] < cycle + 1)
+    
+    if not is_eligible:
+        raise HTTPException(status_code=400, detail="Ce client n'est pas éligible à une récompense actuellement")
+    
+    now = datetime.now(timezone.utc).isoformat()
+    new_rewards_claimed = account["rewards_claimed"] + 1
+    
+    await db.loyalty_accounts.update_one(
+        {"phone": phone_clean},
+        {"$set": {"rewards_claimed": new_rewards_claimed, "updated_at": now}}
+    )
+    
+    # Log the claim event
+    event = {
+        "id": str(uuid.uuid4()),
+        "phone": phone_clean,
+        "order_id": data.order_id,
+        "event_type": "REWARD_CLAIMED",
+        "meta_json": {"claimed_by": user["id"], "reward_number": new_rewards_claimed},
+        "created_at": now
+    }
+    await db.loyalty_events.insert_one(event)
+    
+    return {"message": "Récompense marquée comme réclamée", "rewards_claimed": new_rewards_claimed}
+
+@api_router.get("/loyalty/all", response_model=List[dict])
+async def get_all_loyalty_accounts(user: dict = Depends(require_roles([Role.SUPER_ADMIN]))):
+    """Get all loyalty accounts - Admin only"""
+    accounts = await db.loyalty_accounts.find({}, {"_id": 0}).sort("orders_count", -1).to_list(1000)
+    result = []
+    for account in accounts:
+        cycle = account["orders_count"] // LOYALTY_QUALIFYING_COUNT
+        is_eligible = (account["orders_count"] >= LOYALTY_QUALIFYING_COUNT and 
+                       account["rewards_claimed"] < cycle + 1)
+        result.append({**account, "is_eligible_for_reward": is_eligible})
+    return result
+
+# ========== ADMIN EXPORT ENDPOINTS ==========
+@api_router.get("/admin/exports/{scope}")
+async def export_data(
+    scope: str,
+    date_from: Optional[str] = None,
+    date_to: Optional[str] = None,
+    status: Optional[str] = None,
+    channel: Optional[str] = None,
+    payment_mode: Optional[str] = None,
+    delivery_type: Optional[str] = None,
+    user: dict = Depends(require_roles([Role.SUPER_ADMIN]))
+):
+    """Export selected dataset in CSV format with filters - Super Admin only"""
+    
+    # Build query filter
+    query = {}
+    if date_from:
+        query["created_at"] = {"$gte": date_from}
+    if date_to:
+        if "created_at" in query:
+            query["created_at"]["$lte"] = date_to
+        else:
+            query["created_at"] = {"$lte": date_to}
+    
+    output = io.StringIO()
+    writer = None
+    
+    try:
+        if scope == "orders":
+            if status:
+                query["status"] = status
+            if channel:
+                query["channel"] = channel
+            if payment_mode:
+                query["payment_mode"] = payment_mode
+            if delivery_type:
+                query["type_fulfillment"] = delivery_type
+            
+            orders = await db.orders.find(query, {"_id": 0}).sort("created_at", -1).to_list(10000)
+            if orders:
+                fieldnames = ["order_number", "created_at", "customer_name", "customer_phone", "customer_email",
+                             "type_fulfillment", "delivery_address", "status", "total_amount", "payment_mode",
+                             "payment_status", "channel", "assigned_driver_id"]
+                writer = csv.DictWriter(output, fieldnames=fieldnames, extrasaction='ignore')
+                writer.writeheader()
+                for order in orders:
+                    writer.writerow(order)
+        
+        elif scope == "order_items":
+            orders = await db.orders.find(query, {"_id": 0}).to_list(10000)
+            all_items = []
+            for order in orders:
+                for item in order.get("items", []):
+                    all_items.append({
+                        "order_number": order["order_number"],
+                        "order_date": order["created_at"],
+                        "product_name": item.get("nom_snapshot"),
+                        "quantity": item.get("quantite"),
+                        "unit_price": item.get("prix_unitaire"),
+                        "total": item.get("quantite", 0) * item.get("prix_unitaire", 0)
+                    })
+            if all_items:
+                writer = csv.DictWriter(output, fieldnames=list(all_items[0].keys()))
+                writer.writeheader()
+                writer.writerows(all_items)
+        
+        elif scope == "customers_basic":
+            # Aggregate unique customers from orders
+            pipeline = [
+                {"$group": {
+                    "_id": "$customer_phone",
+                    "name": {"$first": "$customer_name"},
+                    "email": {"$first": "$customer_email"},
+                    "orders_count": {"$sum": 1},
+                    "total_spent": {"$sum": "$total_amount"},
+                    "first_order": {"$min": "$created_at"},
+                    "last_order": {"$max": "$created_at"}
+                }},
+                {"$sort": {"orders_count": -1}}
+            ]
+            customers = await db.orders.aggregate(pipeline).to_list(10000)
+            if customers:
+                fieldnames = ["_id", "name", "email", "orders_count", "total_spent", "first_order", "last_order"]
+                writer = csv.DictWriter(output, fieldnames=fieldnames)
+                writer.writeheader()
+                for c in customers:
+                    c["phone"] = c.pop("_id")
+                    writer.writerow({"_id": c.get("phone"), **c})
+        
+        elif scope == "loyalty_accounts":
+            accounts = await db.loyalty_accounts.find({}, {"_id": 0}).to_list(10000)
+            if accounts:
+                writer = csv.DictWriter(output, fieldnames=list(accounts[0].keys()) if accounts else [])
+                writer.writeheader()
+                writer.writerows(accounts)
+        
+        elif scope == "loyalty_events":
+            events = await db.loyalty_events.find(query, {"_id": 0}).to_list(10000)
+            if events:
+                fieldnames = ["id", "phone", "order_id", "event_type", "created_at"]
+                writer = csv.DictWriter(output, fieldnames=fieldnames, extrasaction='ignore')
+                writer.writeheader()
+                writer.writerows(events)
+        
+        elif scope == "menu_products":
+            products = await db.products.find({}, {"_id": 0}).to_list(1000)
+            categories = await db.categories.find({}, {"_id": 0}).to_list(100)
+            cat_map = {c["id"]: c["nom"] for c in categories}
+            for p in products:
+                p["category_name"] = cat_map.get(p.get("category_id"), "")
+            if products:
+                fieldnames = ["id", "nom", "description", "prix", "category_id", "category_name", "image_url", "is_active"]
+                writer = csv.DictWriter(output, fieldnames=fieldnames, extrasaction='ignore')
+                writer.writeheader()
+                writer.writerows(products)
+        
+        elif scope == "users":
+            users = await db.users.find({}, {"_id": 0, "hash_mot_de_passe": 0}).to_list(1000)
+            if users:
+                fieldnames = ["id", "email", "nom", "telephone", "role", "is_active", "created_at", "last_login_at"]
+                writer = csv.DictWriter(output, fieldnames=fieldnames, extrasaction='ignore')
+                writer.writeheader()
+                writer.writerows(users)
+        
+        elif scope == "notification_logs":
+            logs = await db.notification_logs.find(query, {"_id": 0}).to_list(10000)
+            if logs:
+                writer = csv.DictWriter(output, fieldnames=list(logs[0].keys()) if logs else [])
+                writer.writeheader()
+                writer.writerows(logs)
+        
+        else:
+            raise HTTPException(status_code=400, detail=f"Scope non reconnu: {scope}")
+        
+        output.seek(0)
+        filename = f"export_{scope}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+        
+        # Broadcast export ready event
+        await manager.broadcast({
+            "event": "admin.export.ready",
+            "data": {"scope": scope, "filename": filename},
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        }, "admin")
+        
+        return StreamingResponse(
+            iter([output.getvalue()]),
+            media_type="text/csv",
+            headers={"Content-Disposition": f"attachment; filename={filename}"}
+        )
+    
+    except Exception as e:
+        logger.error(f"Export error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 # ========== BLOG MODELS ==========
 class BlogPostCreate(BaseModel):
     title: str
