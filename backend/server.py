@@ -268,18 +268,44 @@ class ConnectionManager:
         if room not in self.active_connections:
             self.active_connections[room] = []
         self.active_connections[room].append(websocket)
+        logger.info(f"WebSocket connected to room: {room}")
 
     def disconnect(self, websocket: WebSocket, room: str):
         if room in self.active_connections:
-            self.active_connections[room].remove(websocket)
+            if websocket in self.active_connections[room]:
+                self.active_connections[room].remove(websocket)
+            logger.info(f"WebSocket disconnected from room: {room}")
 
     async def broadcast(self, message: dict, room: str):
         if room in self.active_connections:
+            disconnected = []
             for connection in self.active_connections[room]:
                 try:
                     await connection.send_json(message)
-                except:
-                    pass
+                except Exception as e:
+                    logger.warning(f"Failed to send to websocket in {room}: {e}")
+                    disconnected.append(connection)
+            # Clean up disconnected
+            for conn in disconnected:
+                if conn in self.active_connections[room]:
+                    self.active_connections[room].remove(conn)
+
+    async def broadcast_all(self, message: dict):
+        """Broadcast to all rooms"""
+        for room in self.active_connections:
+            await self.broadcast(message, room)
+
+    async def send_order_event(self, event_type: str, order_data: dict, rooms: List[str] = None):
+        """Send order-related events to specified rooms"""
+        message = {
+            "event": event_type,
+            "data": order_data,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "play_sound": event_type in ["order.created", "loyalty.reward.eligible"]
+        }
+        target_rooms = rooms or ["kitchen", "cashier"]
+        for room in target_rooms:
+            await self.broadcast(message, room)
 
 manager = ConnectionManager()
 
