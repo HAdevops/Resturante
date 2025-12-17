@@ -26,3 +26,24 @@
 - Ensure sound notifications are loud and clear
 - Verify loyalty badges appear on eligible orders
 
+
+## Test Update - v1.2.0 Enhancements
+
+### New Features to Test:
+1. **Delivery Note Field** - Separate field for driver instructions (digicode, floor, etc.)
+   - In CartPage: new textarea with 280 char limit
+   - Shows only for LIVRAISON orders
+   - Visible to: CAISSE, LIVREUR, SUPER_ADMIN (not CUISINE)
+   
+2. **Expanded Upsell Popup** - Now includes Burgers and Sandwichs categories
+   
+3. **Admin Toggle for Delivery Slots** - New setting in admin panel
+   - Setting: delivery_time_slots_enabled
+   - API: GET /api/checkout/config (public)
+
+### APIs Modified:
+- POST /api/orders - accepts delivery_note field
+- POST /api/orders/manual - accepts delivery_note field
+- GET /api/checkout/config - returns checkout feature flags
+- PUT /api/admin/settings - can update delivery_time_slots_enabled
+
