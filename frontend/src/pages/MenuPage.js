@@ -90,7 +90,7 @@ export default function MenuPage() {
   return (
     <div className="min-h-screen bg-[#1a1a1a]">
       <Helmet>
-        <title>Menu - O'Delices Épernon | Tacos, Burgers, Pizzas Halal</title>
+        <title>Menu - O&apos;Delices Épernon | Tacos, Burgers, Pizzas Halal</title>
         <meta name="description" content="Découvrez notre menu complet: Tacos, Burgers, Pizzas, Kebabs, Sandwichs et plus. Tous nos produits sont 100% Halal. Commande en ligne à Épernon." />
       </Helmet>
 
