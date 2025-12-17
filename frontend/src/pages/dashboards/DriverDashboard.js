@@ -3,7 +3,7 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import { 
   Bike, MapPin, Phone, User, Navigation, CheckCircle, RefreshCw, LogOut, 
-  Package, Clock, Volume2, VolumeX, DollarSign, AlertCircle, Map, Banknote
+  Package, Clock, Volume2, VolumeX, DollarSign, AlertCircle, Map, Banknote, FileText
 } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { Card } from '../../components/ui/card';
