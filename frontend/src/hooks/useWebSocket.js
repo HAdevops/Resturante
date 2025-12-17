@@ -10,6 +10,7 @@ export function useWebSocket(room, onMessage) {
   const wsRef = useRef(null);
   const reconnectTimeoutRef = useRef(null);
   const audioContextRef = useRef(null);
+  const connectRef = useRef(null);
 
   // Initialize Audio Context
   const initAudioContext = useCallback(() => {
@@ -112,10 +113,12 @@ export function useWebSocket(room, onMessage) {
       console.log(`WebSocket disconnected from room: ${room}`, event.reason);
       setIsConnected(false);
       
-      // Auto-reconnect after 3 seconds
+      // Auto-reconnect after 3 seconds using ref
       reconnectTimeoutRef.current = setTimeout(() => {
         console.log('Attempting to reconnect...');
-        connect();
+        if (connectRef.current) {
+          connectRef.current();
+        }
       }, 3000);
     };
 
@@ -125,6 +128,11 @@ export function useWebSocket(room, onMessage) {
 
     wsRef.current = ws;
   }, [room, onMessage, playOrderNotification, playLoyaltyNotification]);
+
+  // Keep connect ref updated
+  useEffect(() => {
+    connectRef.current = connect;
+  }, [connect]);
 
   const disconnect = useCallback(() => {
     if (reconnectTimeoutRef.current) {
