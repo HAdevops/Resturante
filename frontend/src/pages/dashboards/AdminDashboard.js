@@ -5,7 +5,7 @@ import {
   LayoutDashboard, Users, UtensilsCrossed, Settings, LogOut, RefreshCw,
   Plus, Edit, Trash2, Save, X, ShoppingCart, DollarSign, Banknote,
   Clock, TrendingUp, CreditCard, Ticket, CheckCircle, AlertCircle,
-  Package, Eye, ChevronDown
+  Package, Eye, ChevronDown, Download, Gift, FileSpreadsheet
 } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { Card } from '../../components/ui/card';
