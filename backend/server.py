@@ -1106,6 +1106,18 @@ async def check_loyalty_status(phone: str):
     result = await check_loyalty_eligibility(phone)
     return result
 
+@api_router.get("/loyalty/all", response_model=List[dict])
+async def get_all_loyalty_accounts(user: dict = Depends(require_roles([Role.SUPER_ADMIN]))):
+    """Get all loyalty accounts - Admin only"""
+    accounts = await db.loyalty_accounts.find({}, {"_id": 0}).sort("orders_count", -1).to_list(1000)
+    result = []
+    for account in accounts:
+        cycle = account["orders_count"] // LOYALTY_QUALIFYING_COUNT
+        is_eligible = (account["orders_count"] >= LOYALTY_QUALIFYING_COUNT and 
+                       account["rewards_claimed"] < cycle + 1)
+        result.append({**account, "is_eligible_for_reward": is_eligible})
+    return result
+
 @api_router.get("/loyalty/{phone}", response_model=LoyaltyAccountResponse)
 async def get_loyalty_account(phone: str, user: dict = Depends(require_roles([Role.CAISSE, Role.SUPER_ADMIN]))):
     """Get loyalty account details for a customer - Staff only"""
