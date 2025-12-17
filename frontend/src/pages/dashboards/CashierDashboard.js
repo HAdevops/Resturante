@@ -295,6 +295,12 @@ export default function CashierDashboard() {
           </div>
           
           <div className="flex items-center gap-3">
+            {/* WebSocket Connection Status */}
+            <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs ${isConnected ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+              <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`} />
+              <span className="hidden sm:inline">{isConnected ? 'Connecté' : 'Déconnecté'}</span>
+            </div>
+            
             {/* Sound Toggle */}
             <Button
               variant={soundEnabled ? 'default' : 'outline'}
